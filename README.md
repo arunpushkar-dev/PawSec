@@ -331,6 +331,10 @@ Extension settings sync across devices via `chrome.storage.sync` and are configu
 
 ![PawSec Admin Dashboard — enterprise overview showing 2 users, 105 total prompts, 11 blocked, 2 warned, 92 allowed, with per-user breakdown](docs/screenshots/admin_dashboard.png)
 
+### Browser Plugin
+
+![PawSec Browser Plugin popup — Protected status, 8 blocked / 2 warned / 108 total, server connected, signed in as Arun Pushkar X1977](docs/screenshots/browser_plugin.png)
+
 > **Extension Warning Banner** — shown when a prompt scores in the WARN range (30–69)
 
 ```
