@@ -327,6 +327,10 @@ Extension settings sync across devices via `chrome.storage.sync` and are configu
 
 ![PawSec Security Dashboard — jailbreak prompt blocked at score 70, LLM Analysis chip showing 3 findings: Jailbreak, Unrestricted Assistant, Configuration probing](docs/screenshots/dashboard.png)
 
+### Admin Dashboard
+
+![PawSec Admin Dashboard — enterprise overview showing 2 users, 105 total prompts, 11 blocked, 2 warned, 92 allowed, with per-user breakdown](docs/screenshots/admin_dashboard.png)
+
 > **Extension Warning Banner** — shown when a prompt scores in the WARN range (30–69)
 
 ```
