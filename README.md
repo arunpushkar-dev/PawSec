@@ -1,14 +1,22 @@
-# 🐾 PawSec
+# 🐾 PawSec — Prompt Security for AI Platforms
 
-> **Stop sensitive data from reaching AI chat platforms — before you press Enter.**
+<p align="center">
+  <img src="docs/banner.png" alt="PawSec — Prompt Security for AI Platforms" width="100%"/>
+</p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-pink.svg)](LICENSE)
-[![Chrome Extension](https://img.shields.io/badge/Chrome-MV3-blue?logo=googlechrome)](pawsec-extension/)
-[![Firefox Extension](https://img.shields.io/badge/Firefox-MV2-orange?logo=firefox)](pawsec-extension/)
-[![Edge Extension](https://img.shields.io/badge/Edge-MV3-teal?logo=microsoftedge)](pawsec-extension/)
-[![FastAPI](https://img.shields.io/badge/Server-FastAPI-009688?logo=fastapi)](pawsec-server/)
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](pawsec-server/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+<p align="center">
+  <strong>Stop sensitive data from reaching AI chat platforms — before you press Enter.</strong>
+</p>
+
+<p align="center">
+  <img alt="License" src="https://img.shields.io/badge/LICENSE-MIT-c87fa4?style=for-the-badge"/>
+  <img alt="Release" src="https://img.shields.io/badge/RELEASE-v1.0.0-a85f84?style=for-the-badge"/>
+  <img alt="Chrome" src="https://img.shields.io/badge/CHROME-MV3-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white"/>
+  <img alt="Firefox" src="https://img.shields.io/badge/FIREFOX-MV2-FF7139?style=for-the-badge&logo=firefox&logoColor=white"/>
+  <img alt="Edge" src="https://img.shields.io/badge/EDGE-MV3-0078D4?style=for-the-badge&logo=microsoftedge&logoColor=white"/>
+  <img alt="Python" src="https://img.shields.io/badge/PYTHON-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
+  <img alt="PRs Welcome" src="https://img.shields.io/badge/PRs-WELCOME-brightgreen?style=for-the-badge"/>
+</p>
 
 ---
 
