@@ -102,23 +102,60 @@
     /* ── Stats cards ── */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      grid-template-columns: repeat(5, 1fr);
       gap: 12px; margin-bottom: 24px;
     }
     .stat-card {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 16px 20px;
-      display: flex; flex-direction: column; gap: 4px;
+      background: #fff; border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 18px 14px;
+      display: flex; flex-direction: column; gap: 0;
+      position: relative;
     }
+    .stat-card-top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .stat-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .stat-icon.users   { background: rgba(200,127,164,.15); }
+    .stat-icon.total   { background: rgba(200,127,164,.15); }
+    .stat-icon.blocked { background: rgba(217,95,95,.12); }
+    .stat-icon.warned  { background: rgba(212,117,58,.12); }
+    .stat-icon.allowed { background: rgba(93,184,122,.12); }
+
+    .stat-badge {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .stat-badge.blocked { color: var(--red); }
+    .stat-badge.warned  { color: #d97b2a; }
+    .stat-badge.allowed { color: var(--green); }
+
     .stat-card .stat-value {
-      font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1;
+      font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums;
+      line-height: 1; margin-bottom: 4px;
     }
-    .stat-card .stat-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
-    .stat-card.total   .stat-value { color: var(--teal); }
-    .stat-card.users   .stat-value { color: var(--teal); }
+    .stat-card .stat-label {
+      font-size: 10px; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
+    }
+    .stat-card .stat-sub {
+      font-size: 10px; font-weight: 600; margin-top: 6px; letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .stat-card.users   .stat-value { color: var(--text-primary); }
+    .stat-card.total   .stat-value { color: var(--text-primary); }
     .stat-card.blocked .stat-value { color: var(--red); }
-    .stat-card.warned  .stat-value { color: var(--yellow); }
+    .stat-card.warned  .stat-value { color: #d97b2a; }
     .stat-card.allowed .stat-value { color: var(--green); }
+    .stat-card.blocked .stat-sub   { color: var(--red); }
+    .stat-card.warned  .stat-sub   { color: #d97b2a; }
+    .stat-card.allowed .stat-sub   { color: var(--green); }
+    .stat-card.users   .stat-sub   { color: var(--green); }
+    .stat-card.total   .stat-sub   { color: var(--text-muted); }
 
     /* ── Section header ── */
     .section-header {
@@ -323,24 +360,47 @@
 <div id="tab-overview" class="tab-panel active">
   <div class="stats-grid" id="overview-stats">
     <div class="stat-card users">
+      <div class="stat-card-top">
+        <div class="stat-icon users">👤</div>
+      </div>
       <span class="stat-value" id="ov-users">—</span>
       <span class="stat-label">Total Users</span>
+      <span class="stat-sub">0% Active Today</span>
     </div>
     <div class="stat-card total">
+      <div class="stat-card-top">
+        <div class="stat-icon total">💬</div>
+      </div>
       <span class="stat-value" id="ov-total">—</span>
       <span class="stat-label">Total Prompts</span>
+      <span class="stat-sub">Across All Sessions</span>
     </div>
     <div class="stat-card blocked">
+      <div class="stat-card-top">
+        <div class="stat-icon blocked">🚫</div>
+        <span class="stat-badge blocked">Blocked</span>
+      </div>
       <span class="stat-value" id="ov-blocked">—</span>
-      <span class="stat-label">Blocked</span>
+      <span class="stat-label">Prompts Blocked</span>
+      <span class="stat-sub">Action Required</span>
     </div>
     <div class="stat-card warned">
+      <div class="stat-card-top">
+        <div class="stat-icon warned">⚠️</div>
+        <span class="stat-badge warned">Warned</span>
+      </div>
       <span class="stat-value" id="ov-warned">—</span>
-      <span class="stat-label">Warned</span>
+      <span class="stat-label">Prompts Warned</span>
+      <span class="stat-sub">Policy Violations</span>
     </div>
     <div class="stat-card allowed">
+      <div class="stat-card-top">
+        <div class="stat-icon allowed">✅</div>
+        <span class="stat-badge allowed">Allowed</span>
+      </div>
       <span class="stat-value" id="ov-allowed">—</span>
-      <span class="stat-label">Allowed</span>
+      <span class="stat-label">Prompts Allowed</span>
+      <span class="stat-sub">Safe Interactions</span>
     </div>
   </div>
 
