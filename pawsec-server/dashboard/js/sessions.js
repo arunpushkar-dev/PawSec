@@ -2,10 +2,18 @@
  * Sessions sidebar — paginated list with search + filter.
  */
 
-const PLATFORM_ICONS = {
-  chatgpt: '🤖', claude: '🔶', gemini: '💎',
-  perplexity: '🔍', copilot: '💠', grok: '𝕏', unknown: '❓'
-};
+function timeAgo(dateStr) {
+  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (diff < 60)   return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
+function shortId(id) {
+  // Show as "ID: xxxx-xxxx" using first 9 chars
+  return 'ID: ' + (id ?? '').slice(0, 13).toUpperCase();
+}
 
 export class SessionsManager {
   #sessions = [];
@@ -113,19 +121,17 @@ export class SessionsManager {
 
       const plat = s.platform_hint ?? s.platform ?? 'unknown';
       const count = s.prompt_count ?? 0;
-      const highestBadge = s.blocked_count > 0 ? 'BLOCKED' : s.warned_count > 0 ? 'WARNED' : count > 0 ? 'ALLOWED' : null;
-      const time = new Date(s.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const date = new Date(s.started_at).toLocaleDateString([], { month: 'short', day: 'numeric' });
+      const highestBadge = s.blocked_count > 0 ? 'BLOCKED' : s.warned_count > 0 ? 'WARNED' : count > 0 ? 'PASSED' : null;
 
       el.innerHTML = `
-        <div class="session-platform-icon">${PLATFORM_ICONS[plat] ?? '🌐'}</div>
-        <div class="session-meta">
-          <div class="session-id">${s.session_id}</div>
-          <div class="session-time">${date} ${time} · ${plat}</div>
+        <div class="session-card-header">
+          <span class="session-platform-name">${plat}</span>
+          <span class="session-time-ago">${timeAgo(s.started_at)}</span>
         </div>
-        <div class="session-counts">
-          <span class="prompt-count">${count} prompts</span>
+        <div class="session-short-id">${shortId(s.session_id)}</div>
+        <div class="session-badges">
           ${highestBadge ? `<span class="risk-badge ${highestBadge}">${highestBadge}</span>` : ''}
+          ${count > 0 ? `<span class="prompt-count-badge">${count} PROMPT${count !== 1 ? 'S' : ''}</span>` : ''}
         </div>`;
 
       el.addEventListener('click', () => {
