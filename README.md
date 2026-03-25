@@ -75,17 +75,25 @@ No proxy. No traffic rerouting. No cloud dependency. Just a browser extension th
 
 2. PawSec intercepts the submit event (before it reaches the AI)
 
-3. Nine analyzers run in parallel, in milliseconds, entirely in-browser
+3. Two analysis paths run concurrently (in parallel)
+
+   Path A — Nine regex analyzers, entirely in-browser (zero latency)
    ├─ PII detector          ├─ PHI detector
    ├─ API secrets           ├─ Credentials
    ├─ Code injection        ├─ Private URLs
    ├─ Business data         ├─ Financial data
    └─ Unknown malicious intent
 
-4. A weighted risk score (0–100) is computed
+   Path B — Local LLM semantic analysis (optional)
+   └─ Requires PawSec Server + Ollama running locally
+      Sends prompt to Ollama for intent/persona/pattern classification
+      8-second timeout — fails open (ALLOW) if unavailable
+
+4. A weighted risk score (0–100) is computed from Path A results
    ├─ Score < 30  → ALLOW  (prompt proceeds normally)
    ├─ Score 30–69 → WARN   (user sees a warning banner)
    └─ Score ≥ 70  → BLOCK  (prompt is stopped, overlay shown)
+   The more severe result of Path A and Path B is used as the final decision
 
 5. Analysis result is sent to the PawSec Server (optional)
    ├─ Safe prompts: sent as [REDACTED], session counter only
