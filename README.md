@@ -343,43 +343,9 @@ Extension settings sync across devices via `chrome.storage.sync` and are configu
 
 ![PawSec Extension Block Overlay — prompt blocked at score 70/100 with Malicious Intent tag on ChatGPT, blurred background, Dismiss button](docs/screenshots/block_overlay.png)
 
-> **Extension Warning Banner** — shown when a prompt scores in the WARN range (30–69)
+### Extension Warning Banner
 
-```
-┌─────────────────────────────────────────────────────┐
-│  ⚠️  PawSec detected sensitive content              │
-│  Risk Score: 58 / 100                               │
-│  [ PII ]  [ API Secrets ]                           │
-│                                                     │
-│  [ Edit Prompt ]          [ Submit Anyway ]         │
-└─────────────────────────────────────────────────────┘
-```
-
-> **Extension Block Overlay** — shown when a prompt scores ≥ 70
-
-```
-┌─────────────────────────────────────────────────────┐
-│  🚫  Prompt Blocked                                 │
-│  Risk Score: 94 / 100                               │
-│  [ Malicious Intent ]  [ Credentials ]              │
-│                                                     │
-│  This prompt contains content that may expose       │
-│  sensitive data or bypass AI safety measures.       │
-│                                                     │
-│  [ Edit Prompt ]                                    │
-└─────────────────────────────────────────────────────┘
-```
-
-> **Dashboard** — session timeline with per-prompt risk cards
-
-```
-Session: chatgpt.com  ·  Started 09:14  ·  3 blocked  ·  1 warned
-
-  10:22  [REDACTED]                             ALLOWED   12
-  10:26  My AWS key is AKIA...████████          BLOCKED   94
-  10:31  Patient John ████ has diagnosis...     BLOCKED   88
-  10:45  Can you help debug this Python?        ALLOWED    8
-```
+![PawSec Extension Warning Banner — sensitive content detected at score 50 with Malicious Intent tag on ChatGPT, Cancel and Send Anyway options](docs/screenshots/warning_banner.png)
 
 ---
 
