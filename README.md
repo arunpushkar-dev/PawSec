@@ -339,6 +339,10 @@ Extension settings sync across devices via `chrome.storage.sync` and are configu
 
 ![PawSec Plugin Settings — server configuration, risk thresholds (warn ≥ 30, block ≥ 70), in-browser analyzers toggles, and local LLM analysis option](docs/screenshots/plugin_settings.png)
 
+### Extension Block Overlay
+
+![PawSec Extension Block Overlay — prompt blocked at score 70/100 with Malicious Intent tag on ChatGPT, blurred background, Dismiss button](docs/screenshots/block_overlay.png)
+
 > **Extension Warning Banner** — shown when a prompt scores in the WARN range (30–69)
 
 ```
