@@ -20,14 +20,19 @@ function chipRow(label, count, icon = '') {
   </div>`;
 }
 
-function llmTags(llm) {
-  if (!llm?.available) return '';
-  const tags = [
-    { label: llm.Intent_Category,           sev: llm.Intent_Risk_Severity },
-    { label: llm.Generic_Persona_Category,   sev: llm.Persona_Risk_Severity },
-    { label: llm.Pattern,                    sev: llm.Pattern_Risk_Severity },
-  ].filter(t => t.label && t.label !== 'Benign' && t.label !== 'Neutral/Default State' && t.label !== 'Normal');
+const _LLM_NEUTRAL = new Set(['Benign', 'Neutral/Default State', 'Normal', null, undefined, '']);
 
+function llmRiskTags(llm) {
+  if (!llm?.available) return [];
+  return [
+    { label: llm.Intent_Category,         sev: llm.Intent_Risk_Severity },
+    { label: llm.Generic_Persona_Category, sev: llm.Persona_Risk_Severity },
+    { label: llm.Pattern,                  sev: llm.Pattern_Risk_Severity },
+  ].filter(t => t.label && !_LLM_NEUTRAL.has(t.label));
+}
+
+function llmTags(llm) {
+  const tags = llmRiskTags(llm);
   if (!tags.length) return '';
   return `<div class="llm-row">
     ${tags.map(t => `<span class="llm-tag ${SEVERITY_CLASS[t.sev] ?? ''}">${t.label}</span>`).join('')}
@@ -65,6 +70,7 @@ export function buildPromptCard(prompt) {
         ${chipRow('Business Data',  a.business_data?.count ?? 0,             '🏢')}
         ${chipRow('Financial',      a.financial_data?.count ?? 0,            '💰')}
         ${chipRow('Unknown Malicious Intent', a.unknown_malicious_intent?.count ?? 0,  '🎭')}
+        ${chipRow('LLM Analysis',             llmRiskTags(a.llm_classification).length,  '🤖')}
       </div>
       ${llmTags(a.llm_classification)}
       ${recs.length ? `<div class="recommendations">
