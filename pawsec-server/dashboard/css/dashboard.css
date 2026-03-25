@@ -108,8 +108,9 @@ header {
 #stats-bar {
   grid-area: stats;
   display: flex;
-  gap: 1px;
-  background: var(--border);
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--bg-primary);
   border-bottom: 1px solid var(--border);
 }
 
@@ -117,31 +118,77 @@ header {
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  padding: 10px 16px;
-  background: var(--bg-secondary);
+  justify-content: space-between;
+  gap: 4px;
+  padding: 12px 16px 10px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
   cursor: default;
+  min-width: 0;
+}
+.stat-card.platform-card {
+  flex: 1.4;
+  gap: 8px;
 }
 
+.stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
 .stat-value {
-  font-size: 22px;
+  font-size: 32px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
-.stat-label {
-  font-size: 11px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
 
-.stat-card.total   .stat-value { color: var(--accent); }
+.stat-card.total   .stat-value { color: var(--text-primary); }
 .stat-card.blocked .stat-value { color: var(--red); }
-.stat-card.warned  .stat-value { color: var(--yellow); }
-.stat-card.allowed .stat-value { color: var(--green); }
+.stat-card.warned  .stat-value { color: #d97b2a; }
+.stat-card.passed  .stat-value { color: #3aaa6e; }
+
+.stat-track {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+.stat-fill {
+  height: 100%;
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.4s ease;
+}
+.stat-fill.total   { background: var(--accent); }
+.stat-fill.blocked { background: var(--red); }
+.stat-fill.warned  { background: #d97b2a; }
+.stat-fill.passed  { background: #3aaa6e; }
+
+/* Platform traffic list */
+#platform-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.platform-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.platform-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.platform-name { flex: 1; }
+.platform-count { font-weight: 600; color: var(--text-primary); font-size: 12px; }
 
 /* ─── Sidebar (sessions list) ────────────────────────── */
 

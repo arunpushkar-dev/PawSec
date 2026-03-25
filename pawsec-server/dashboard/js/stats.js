@@ -63,20 +63,49 @@ export class StatsManager {
     this.#render();
   }
 
-  #render() {
-    document.getElementById('stat-total').textContent   = this.#totals.total.toLocaleString();
-    document.getElementById('stat-blocked').textContent = this.#totals.blocked.toLocaleString();
-    document.getElementById('stat-warned').textContent  = this.#totals.warned.toLocaleString();
-    document.getElementById('stat-allowed').textContent = this.#totals.allowed.toLocaleString();
+  static #friendlyName(hostname) {
+    const map = {
+      'chatgpt.com':             'ChatGPT',
+      'claude.ai':               'Claude',
+      'gemini.google.com':       'Google',
+      'www.perplexity.ai':       'Perplexity',
+      'copilot.microsoft.com':   'Copilot',
+      'x.com':                   'Grok',
+    };
+    return map[hostname] ?? hostname;
+  }
 
+  static #dotColor(hostname) {
+    const red  = ['chatgpt.com', 'gemini.google.com', 'x.com', 'copilot.microsoft.com'];
+    return red.includes(hostname) ? 'var(--red)' : '#3aaa6e';
+  }
+
+  #render() {
+    const { total, blocked, warned, allowed } = this.#totals;
+    document.getElementById('stat-total').textContent   = total.toLocaleString();
+    document.getElementById('stat-blocked').textContent = blocked.toLocaleString();
+    document.getElementById('stat-warned').textContent  = warned.toLocaleString();
+    document.getElementById('stat-allowed').textContent = allowed.toLocaleString();
+
+    // Progress bars — each as % of total
+    const pct = (n) => total > 0 ? Math.round((n / total) * 100) : 0;
+    document.getElementById('fill-total').style.width   = '100%';
+    document.getElementById('fill-blocked').style.width = `${pct(blocked)}%`;
+    document.getElementById('fill-warned').style.width  = `${pct(warned)}%`;
+    document.getElementById('fill-passed').style.width  = `${pct(allowed)}%`;
+
+    // Platform traffic list
     const bar = document.getElementById('platform-bar');
     bar.innerHTML = '';
-    const ICONS = { chatgpt: '🤖', claude: '🔶', gemini: '💎', perplexity: '🔍', copilot: '💠', grok: '𝕏', unknown: '❓' };
-    for (const [plat, count] of Object.entries(this.#platforms)) {
-      const chip = document.createElement('span');
-      chip.style.cssText = 'font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:4px;';
-      chip.innerHTML = `${ICONS[plat] ?? '🌐'} <strong style="color:var(--text-primary)">${count}</strong> ${plat}`;
-      bar.appendChild(chip);
+    const sorted = Object.entries(this.#platforms).sort((a, b) => b[1] - a[1]);
+    for (const [plat, count] of sorted) {
+      const row = document.createElement('div');
+      row.className = 'platform-row';
+      row.innerHTML = `
+        <span class="platform-dot" style="background:${StatsManager.#dotColor(plat)}"></span>
+        <span class="platform-name">${StatsManager.#friendlyName(plat)}</span>
+        <span class="platform-count">${count}</span>`;
+      bar.appendChild(row);
     }
   }
 }

@@ -87,24 +87,28 @@
   <!-- Stats Bar -->
   <div id="stats-bar">
     <div class="stat-card total">
-      <span class="stat-value" id="stat-total">0</span>
       <span class="stat-label">Total Analyzed</span>
+      <span class="stat-value" id="stat-total">0</span>
+      <div class="stat-track"><div class="stat-fill total" id="fill-total"></div></div>
     </div>
     <div class="stat-card blocked">
-      <span class="stat-value" id="stat-blocked">0</span>
       <span class="stat-label">Blocked</span>
+      <span class="stat-value" id="stat-blocked">0</span>
+      <div class="stat-track"><div class="stat-fill blocked" id="fill-blocked"></div></div>
     </div>
     <div class="stat-card warned">
-      <span class="stat-value" id="stat-warned">0</span>
       <span class="stat-label">Warned</span>
+      <span class="stat-value" id="stat-warned">0</span>
+      <div class="stat-track"><div class="stat-fill warned" id="fill-warned"></div></div>
     </div>
-    <div class="stat-card" style="border-top-color:var(--text-muted);">
-      <span class="stat-value" id="stat-allowed" style="color:var(--text-secondary);">0</span>
-      <span class="stat-label">Passed (not stored)</span>
+    <div class="stat-card passed">
+      <span class="stat-label">Passed</span>
+      <span class="stat-value" id="stat-allowed">0</span>
+      <div class="stat-track"><div class="stat-fill passed" id="fill-passed"></div></div>
     </div>
-    <div class="stat-card" style="flex:2">
-      <div id="platform-bar" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;"></div>
-      <span class="stat-label">By Platform</span>
+    <div class="stat-card platform-card">
+      <span class="stat-label">Platform Traffic</span>
+      <div id="platform-bar"></div>
     </div>
   </div>
 
