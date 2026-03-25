@@ -70,6 +70,8 @@ No proxy. No traffic rerouting. No cloud dependency. Just a browser extension th
 
 ## 🔄 How It Works
 
+![The PawSec Safe Prompt Workflow — infographic showing 6 steps: user types prompt, PawSec intercepts, concurrent Path A (9 regex analyzers) and Path B (optional local LLM), weighted risk decision, audit results, dashboard](docs/screenshots/how_it_works.png)
+
 ```
 1. User types a prompt in ChatGPT / Claude / Gemini / etc.
 
