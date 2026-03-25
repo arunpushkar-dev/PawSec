@@ -51,6 +51,11 @@ class UnknownMaliciousIntentDetector:
              'pattern': re.compile(
                  r'\bignore\s+(?:\w+\s+){0,3}(?:previous|prior|above|all\s+previous)\s+(?:\w+\s+){0,3}instructions?',
                  re.IGNORECASE)},
+            {'name': 'prompt_injection_override',
+             'risk': 'CRITICAL',
+             'pattern': re.compile(
+                 r'\b(?:ignore|forget|disregard)\s+(?:the\s+|all\s+|any\s+)?(?:above|previous|prior|earlier)\s+(?:\w+\s+){0,2}(?:directions?|instructions?|commands?|context|prompt|rules?|guidelines?)',
+                 re.IGNORECASE)},
             {'name': 'system_tag_override',
              'risk': 'CRITICAL',
              'pattern': re.compile(

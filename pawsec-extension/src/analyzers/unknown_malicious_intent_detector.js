@@ -16,6 +16,7 @@ const UMI_PATTERNS = [
   { name: 'jailbreak_dan',                risk: 'CRITICAL', re: /\bDAN\b|\bDo\s+Anything\s+Now\b/gi },
   { name: 'pretend_no_rules',             risk: 'CRITICAL', re: /\bpretend\s+(?:you\s+have\s+no|there\s+are\s+no)\s+(?:rules?|restrictions?|guidelines?|limits?)/gi },
   { name: 'ignore_previous_instructions', risk: 'CRITICAL', re: /\bignore\s+(?:\w+\s+){0,3}(?:previous|prior|above|all\s+previous)\s+(?:\w+\s+){0,3}instructions?/gi },
+  { name: 'prompt_injection_override',   risk: 'CRITICAL', re: /\b(?:ignore|forget|disregard)\s+(?:the\s+|all\s+|any\s+)?(?:above|previous|prior|earlier)\s+(?:\w+\s+){0,2}(?:directions?|instructions?|commands?|context|prompt|rules?|guidelines?)/gi },
   { name: 'system_tag_override',          risk: 'CRITICAL', re: /\[(?:SYSTEM|INST|SYS|ADMIN|ROOT)\s+(?:OVERRIDE|BYPASS|IGNORE|CONTROL|DIRECTIVE|COMMAND|JAILBREAK|UNLOCK)\]/gi },
   { name: 'system_bracket_ignore',        risk: 'CRITICAL', re: /\[(?:SYSTEM|INST|SYS)\]\s*(?:ignore|override|bypass)/gi },
 
