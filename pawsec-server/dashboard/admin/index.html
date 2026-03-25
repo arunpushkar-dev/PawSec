@@ -159,30 +159,71 @@
 
     /* ── Section header ── */
     .section-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 14px;
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 14px; gap: 12px;
     }
-    .section-header h2 { font-size: 15px; font-weight: 600; }
+    .section-header-left h2 { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+    .section-header-left p  { font-size: 12px; color: var(--text-muted); margin: 0; }
+    .section-header-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
 
     /* ── Table ── */
-    .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+    .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); background: #fff; }
     table { width: 100%; border-collapse: collapse; }
     thead { background: var(--bg-secondary); }
     th {
-      padding: 10px 14px; text-align: left;
-      font-size: 11px; font-weight: 600;
-      color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 12px 16px; text-align: left;
+      font-size: 10px; font-weight: 700;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em;
       border-bottom: 1px solid var(--border);
       white-space: nowrap;
     }
     td {
-      padding: 10px 14px; font-size: 13px;
+      padding: 14px 16px; font-size: 13px;
       border-bottom: 1px solid var(--border);
       color: var(--text-primary);
     }
     tbody tr:last-child td { border-bottom: none; }
     tbody tr:hover { background: var(--bg-hover); }
     td.muted { color: var(--text-secondary); }
+
+    /* ── User avatar + name cell ── */
+    .user-cell { display: flex; align-items: center; gap: 10px; }
+    .user-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(200,127,164,.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: var(--accent);
+      flex-shrink: 0; text-transform: uppercase;
+    }
+    .user-name   { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .user-role   { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .company-pill {
+      display: inline-block; padding: 2px 9px; border-radius: 4px;
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      font-size: 11px; font-weight: 600; color: var(--text-secondary);
+      letter-spacing: 0.04em;
+    }
+    .num-blocked { color: var(--red);    font-weight: 700; }
+    .num-warned  { color: #d97b2a;       font-weight: 700; }
+    .num-allowed { color: #3aaa6e;       font-weight: 700; }
+    .num-zero    { color: var(--text-muted); font-weight: 400; }
+    .date-cell   { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.3; }
+    .date-cell small { display: block; font-size: 11px; font-weight: 400; color: var(--text-muted); }
+
+    /* ── Table footer ── */
+    .table-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px; border-top: 1px solid var(--border);
+      font-size: 12px; color: var(--text-muted);
+    }
+    .table-footer-nav { display: flex; gap: 4px; }
+    .table-footer-nav button {
+      width: 28px; height: 28px; border-radius: 6px;
+      border: 1px solid var(--border); background: #fff;
+      cursor: pointer; font-size: 13px; color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .table-footer-nav button:hover { background: var(--bg-hover); }
 
     /* ── Badges ── */
     .badge {
@@ -404,7 +445,20 @@
     </div>
   </div>
 
-  <div class="section-header"><h2>Per-User Breakdown</h2></div>
+  <div class="section-header">
+    <div class="section-header-left">
+      <h2>Per-User Breakdown</h2>
+      <p>Detailed activity logs and security status per identity</p>
+    </div>
+    <div class="section-header-actions">
+      <button class="btn" id="overview-filter-btn" style="display:flex;align-items:center;gap:5px;">
+        <span>⚙</span> Filter
+      </button>
+      <button class="btn btn-teal" id="overview-export-btn" style="display:flex;align-items:center;gap:5px;">
+        <span>↓</span> Export CSV
+      </button>
+    </div>
+  </div>
   <div class="table-wrap">
     <table>
       <thead>
@@ -415,6 +469,13 @@
       </thead>
       <tbody id="overview-table"><tr class="loading-row"><td colspan="7"><div class="spinner" style="margin:auto;"></div></td></tr></tbody>
     </table>
+    <div class="table-footer">
+      <span id="overview-footer-count">—</span>
+      <div class="table-footer-nav">
+        <button>&#8592;</button>
+        <button>&#8594;</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -666,18 +727,38 @@ async function loadOverview() {
     const tbody = document.getElementById('overview-table');
     if (!data.per_user || data.per_user.length === 0) {
       tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">No users yet.</td></tr>';
+      document.getElementById('overview-footer-count').textContent = 'Showing 0 users';
       return;
     }
-    tbody.innerHTML = data.per_user.map(u => `
-      <tr>
-        <td>${esc(u.name)}</td>
-        <td class="muted">${esc(u.company_id || '—')}</td>
+    const users = data.per_user;
+    document.getElementById('overview-footer-count').textContent =
+      `Showing ${users.length} of ${users.length} registered user${users.length !== 1 ? 's' : ''}`;
+
+    tbody.innerHTML = users.map(u => {
+      const initial = (u.name || '?')[0].toUpperCase();
+      const role    = u.is_admin ? 'System Root' : 'Staff Member';
+      const compId  = u.company_id ? `<span class="company-pill">${esc(u.company_id)}</span>` : '<span class="muted">—</span>';
+      const lastDt  = u.last_active ? new Date(u.last_active) : null;
+      const datePart = lastDt ? lastDt.toLocaleDateString([], { day:'2-digit', month:'short' }) : '—';
+      const timePart = lastDt ? lastDt.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '';
+      return `<tr>
+        <td>
+          <div class="user-cell">
+            <div class="user-avatar">${initial}</div>
+            <div>
+              <div class="user-name">${esc(u.name)}</div>
+              <div class="user-role">${role}</div>
+            </div>
+          </div>
+        </td>
+        <td>${compId}</td>
         <td class="muted">${esc(u.email)}</td>
-        <td><span style="color:var(--red);font-weight:600;">${u.blocked}</span></td>
-        <td><span style="color:var(--yellow);font-weight:600;">${u.warned}</span></td>
-        <td><span style="color:var(--green);font-weight:600;">${u.allowed}</span></td>
-        <td class="muted">${fmtDate(u.last_active)}</td>
-      </tr>`).join('');
+        <td><span class="${u.blocked > 0 ? 'num-blocked' : 'num-zero'}">${u.blocked}</span></td>
+        <td><span class="${u.warned  > 0 ? 'num-warned'  : 'num-zero'}">${u.warned}</span></td>
+        <td><span class="${u.allowed > 0 ? 'num-allowed' : 'num-zero'}">${u.allowed}</span></td>
+        <td><div class="date-cell">${datePart}<small>${timePart}</small></div></td>
+      </tr>`;
+    }).join('');
   } catch (err) {
     document.getElementById('overview-table').innerHTML =
       `<tr><td colspan="7" style="text-align:center;color:var(--red);padding:24px;">Error: ${esc(err.message)}</td></tr>`;

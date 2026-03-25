@@ -501,6 +501,7 @@ async def get_admin_stats(db: AsyncSession) -> dict:
             "name":        u.name,
             "company_id":  u.company_id,
             "email":       u.email,
+            "is_admin":    u.is_admin,
             "blocked":     b,
             "warned":      w,
             "allowed":     al,
