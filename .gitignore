@@ -1,0 +1,43 @@
+# Secrets
+.env
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Node / Extension build
+node_modules/
+pawsec-extension/dist/
+pawsec-extension/dist-chrome/
+pawsec-extension/dist-firefox/
+pawsec-extension/dist-edge/
+pawsec-extension/*.zip
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Claude Code local config (memory, session data)
+.claude/

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <!--
+      Enterprise-grade PawSec cat paw icon.
+      White outer silhouette (fluffy edge) + pink toe beans + pink main pad.
+      Transparent background.
+    -->
+
+    <!-- Soft fluffy outer edge: dilate alpha → blur → fill white → merge under crisp original -->
+    <filter id="fluffy" x="-30%" y="-30%" width="160%" height="160%">
+      <feMorphology operator="dilate" in="SourceAlpha" radius="2.5" result="expanded"/>
+      <feGaussianBlur in="expanded" stdDeviation="2.2" result="blurred"/>
+      <feFlood flood-color="#ffffff" flood-opacity="0.9" result="white"/>
+      <feComposite in="white" in2="blurred" operator="in" result="halo"/>
+      <feMerge>
+        <feMergeNode in="halo"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Subtle drop-shadow for depth -->
+    <filter id="shadow" x="-25%" y="-20%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3.5"
+                    flood-color="#0f172a" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <!-- ── White paw silhouette (fluffy edge + drop shadow) ── -->
+  <g filter="url(#shadow)">
+    <g filter="url(#fluffy)">
+      <!-- Main palm pad -->
+      <ellipse cx="50" cy="68" rx="34" ry="28" fill="#ffffff"/>
+      <!-- Outer-left toe -->
+      <circle  cx="19" cy="47"  r="10.5" fill="#ffffff"/>
+      <!-- Inner-left toe -->
+      <circle  cx="36" cy="31"  r="12.5" fill="#ffffff"/>
+      <!-- Inner-right toe -->
+      <circle  cx="64" cy="31"  r="12.5" fill="#ffffff"/>
+      <!-- Outer-right toe -->
+      <circle  cx="81" cy="47"  r="10.5" fill="#ffffff"/>
+    </g>
+  </g>
+
+  <!-- ── Pink main pad (three-lobe / trefoil) ── -->
+  <circle cx="43" cy="72" r="10"  fill="#F2AABD"/>
+  <circle cx="57" cy="72" r="10"  fill="#F2AABD"/>
+  <circle cx="50" cy="64" r="10"  fill="#F2AABD"/>
+
+  <!-- ── Pink toe beans ── -->
+  <circle cx="19" cy="47"  r="7"   fill="#F2AABD"/>
+  <circle cx="36" cy="31"  r="8.5" fill="#F2AABD"/>
+  <circle cx="64" cy="31"  r="8.5" fill="#F2AABD"/>
+  <circle cx="81" cy="47"  r="7"   fill="#F2AABD"/>
+</svg>

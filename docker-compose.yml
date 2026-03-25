@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  pawsec-server:
+    build:
+      context: ./pawsec-server
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PAWSEC_API_KEY=${PAWSEC_API_KEY:-change-me-in-production}
+      - DB_PATH=/data/pawsec.db
+      - HOST=0.0.0.0
+      - PORT=8000
+      - OLLAMA_URL=${OLLAMA_URL:-http://host.docker.internal:11434/api/chat}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen2.5-finetuned}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@pawsec.local}
+    volumes:
+      - pawsec-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  pawsec-data:

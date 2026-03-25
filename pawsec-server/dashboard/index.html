@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PawSec Dashboard</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- Header -->
+  <header>
+    <a href="#" class="logo" aria-label="PawSec Dashboard">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <filter id="db-fluffy" x="-30%" y="-30%" width="160%" height="160%">
+            <feMorphology operator="dilate" in="SourceAlpha" radius="2.5" result="expanded"/>
+            <feGaussianBlur in="expanded" stdDeviation="2.2" result="blurred"/>
+            <feFlood flood-color="#ffffff" flood-opacity="0.9" result="white"/>
+            <feComposite in="white" in2="blurred" operator="in" result="halo"/>
+            <feMerge><feMergeNode in="halo"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="db-shadow" x="-25%" y="-20%" width="150%" height="150%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3.5" flood-color="#0f172a" flood-opacity="0.18"/>
+          </filter>
+        </defs>
+        <g filter="url(#db-shadow)">
+          <g filter="url(#db-fluffy)">
+            <ellipse cx="50" cy="68" rx="34" ry="28" fill="#ffffff"/>
+            <circle cx="19" cy="47" r="10.5" fill="#ffffff"/>
+            <circle cx="36" cy="31" r="12.5" fill="#ffffff"/>
+            <circle cx="64" cy="31" r="12.5" fill="#ffffff"/>
+            <circle cx="81" cy="47" r="10.5" fill="#ffffff"/>
+          </g>
+        </g>
+        <circle cx="43" cy="72" r="10"  fill="#F2AABD"/>
+        <circle cx="57" cy="72" r="10"  fill="#F2AABD"/>
+        <circle cx="50" cy="64" r="10"  fill="#F2AABD"/>
+        <circle cx="19" cy="47" r="7"   fill="#F2AABD"/>
+        <circle cx="36" cy="31" r="8.5" fill="#F2AABD"/>
+        <circle cx="64" cy="31" r="8.5" fill="#F2AABD"/>
+        <circle cx="81" cy="47" r="7"   fill="#F2AABD"/>
+      </svg>
+      PawSec
+    </a>
+    <span style="color:var(--text-muted);font-size:12px;margin-left:4px;">Security Dashboard</span>
+
+    <div class="header-right">
+      <div class="ws-indicator">
+        <div class="ws-dot" id="ws-dot"></div>
+        <span id="ws-label">Connecting...</span>
+      </div>
+      <button id="settings-btn" title="Configure server URL and API Key" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-secondary);cursor:pointer;padding:4px 10px;font-size:12px;margin-left:12px;">Settings</button>
+    </div>
+  </header>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" style="display:none;position:fixed;inset:0;background:rgba(200,127,164,0.25);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:28px 32px;width:420px;max-width:95vw;box-shadow:var(--shadow);">
+      <h3 style="color:var(--text-primary);margin-bottom:6px;font-size:16px;">Dashboard Settings</h3>
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:18px;">Saved to browser localStorage. Page will reload to reconnect.</p>
+      <label style="display:block;font-size:12px;color:var(--text-secondary);margin-bottom:4px;">Server URL</label>
+      <input id="cfg-server" type="text" placeholder="http://localhost:8000" style="width:100%;background:var(--bg-secondary);border:1px solid var(--border);border-radius:6px;color:var(--text-primary);padding:8px 10px;font-size:13px;margin-bottom:14px;outline:none;" />
+      <label style="display:block;font-size:12px;color:var(--text-secondary);margin-bottom:4px;">API Key</label>
+      <input id="cfg-key" type="password" placeholder="psk_..." style="width:100%;background:var(--bg-secondary);border:1px solid var(--border);border-radius:6px;color:var(--text-primary);padding:8px 10px;font-size:13px;margin-bottom:8px;outline:none;" />
+      <!-- Verified user identity banner -->
+      <div id="cfg-identity" style="display:none;padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:6px;font-size:12px;margin-bottom:12px;">
+        <span style="color:var(--text-muted);">Verified:</span>
+        <strong id="cfg-uid-name" style="color:var(--text-primary);margin-left:6px;"></strong>
+        <span id="cfg-uid-company" style="color:var(--text-secondary);margin-left:6px;"></span>
+        <span id="cfg-uid-email" style="color:var(--text-muted);margin-left:6px;font-size:11px;"></span>
+      </div>
+      <div id="cfg-identity-err" style="display:none;font-size:12px;color:var(--red);margin-bottom:10px;"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button id="cfg-cancel" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-secondary);cursor:pointer;padding:7px 16px;font-size:13px;">Cancel</button>
+        <button id="cfg-verify" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--teal);cursor:pointer;padding:7px 16px;font-size:13px;">Verify Key</button>
+        <button id="cfg-save" style="background:var(--teal);border:none;border-radius:6px;color:#000;cursor:pointer;padding:7px 16px;font-size:13px;font-weight:600;">Save and Reconnect</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Bar -->
+  <div id="stats-bar">
+    <div class="stat-card total">
+      <span class="stat-value" id="stat-total">0</span>
+      <span class="stat-label">Total Analyzed</span>
+    </div>
+    <div class="stat-card blocked">
+      <span class="stat-value" id="stat-blocked">0</span>
+      <span class="stat-label">Blocked</span>
+    </div>
+    <div class="stat-card warned">
+      <span class="stat-value" id="stat-warned">0</span>
+      <span class="stat-label">Warned</span>
+    </div>
+    <div class="stat-card" style="border-top-color:var(--text-muted);">
+      <span class="stat-value" id="stat-allowed" style="color:var(--text-secondary);">0</span>
+      <span class="stat-label">Passed (not stored)</span>
+    </div>
+    <div class="stat-card" style="flex:2">
+      <div id="platform-bar" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;"></div>
+      <span class="stat-label">By Platform</span>
+    </div>
+  </div>
+
+  <!-- Sessions Sidebar -->
+  <div id="sidebar">
+    <div class="sidebar-header">
+      <h2>Sessions</h2>
+      <span id="session-count" style="margin-left:auto;font-size:12px;color:var(--text-muted);"></span>
+      <button id="clear-local-btn" title="Clear local view — server records are kept and visible to admin" style="background:rgba(248,81,73,0.1);border:1px solid var(--red);border-radius:5px;color:var(--red);cursor:pointer;padding:3px 10px;font-size:11px;font-weight:500;margin-left:8px;white-space:nowrap;">🧹 Clear View</button>
+    </div>
+    <div id="local-cleared-banner" style="display:none;padding:6px 12px;background:rgba(227,144,47,0.1);border-bottom:1px solid rgba(227,144,47,0.3);font-size:11px;color:var(--orange);">
+      View cleared on <span id="cleared-since"></span>. Records are preserved on the server.
+      <button onclick="undoClearLocal()" style="background:none;border:none;color:var(--teal);cursor:pointer;font-size:11px;margin-left:8px;padding:0;">Restore</button>
+    </div>
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="search" id="search-input" placeholder="Search sessions..." autocomplete="off" />
+    </div>
+    <div class="filter-row">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="BLOCKED">Blocked</button>
+      <button class="filter-btn" data-filter="WARNED">Warned</button>
+    </div>
+    <div id="sessions-list" role="list" aria-label="Sessions"></div>
+  </div>
+
+  <!-- Detail Panel -->
+  <div id="detail">
+    <div class="empty-state" id="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      <p>Select a session to view analysis</p>
+    </div>
+    <div id="session-detail" style="display:none;"></div>
+  </div>
+
+</div>
+
+<script type="module" src="js/app.js"></script>
+<script>
+  const modal     = document.getElementById('settings-modal');
+  const cfgServer = document.getElementById('cfg-server');
+  const cfgKey    = document.getElementById('cfg-key');
+
+  async function verifyCfgKey() {
+    const server = cfgServer.value.trim().replace(/\/$/, '') || 'http://localhost:8000';
+    const key    = cfgKey.value.trim();
+    const idEl   = document.getElementById('cfg-identity');
+    const errEl  = document.getElementById('cfg-identity-err');
+    idEl.style.display  = 'none';
+    errEl.style.display = 'none';
+    if (!key) { errEl.textContent = 'Enter an API key first.'; errEl.style.display = 'block'; return null; }
+    try {
+      const res = await fetch(`${server}/api/v1/me`, {
+        headers: { 'X-API-Key': key },
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!res.ok) {
+        errEl.textContent = `Key not recognised (HTTP ${res.status}) — check key and server URL.`;
+        errEl.style.display = 'block';
+        return null;
+      }
+      const user = await res.json();
+      document.getElementById('cfg-uid-name').textContent    = user.name    || '';
+      document.getElementById('cfg-uid-company').textContent = user.company_id ? `(${user.company_id})` : '';
+      document.getElementById('cfg-uid-email').textContent   = user.email   || '';
+      idEl.style.display = 'block';
+      return user;
+    } catch (e) {
+      errEl.textContent = 'Could not reach server: ' + e.message.slice(0, 60);
+      errEl.style.display = 'block';
+      return null;
+    }
+  }
+
+  document.getElementById('settings-btn').addEventListener('click', () => {
+    const savedServer = localStorage.getItem('pawsec_server') || 'http://localhost:8000';
+    const savedKey    = localStorage.getItem('pawsec_api_key') || '';
+    cfgServer.value = savedServer;
+    cfgKey.value    = savedKey;
+    // Show cached identity if already saved
+    const cachedName    = localStorage.getItem('pawsec_user_name') || '';
+    const cachedCompany = localStorage.getItem('pawsec_company_id') || '';
+    const cachedEmail   = localStorage.getItem('pawsec_user_email') || '';
+    if (savedKey && cachedName) {
+      document.getElementById('cfg-uid-name').textContent    = cachedName;
+      document.getElementById('cfg-uid-company').textContent = cachedCompany ? `(${cachedCompany})` : '';
+      document.getElementById('cfg-uid-email').textContent   = cachedEmail;
+      document.getElementById('cfg-identity').style.display  = 'block';
+    } else {
+      document.getElementById('cfg-identity').style.display     = 'none';
+      document.getElementById('cfg-identity-err').style.display = 'none';
+    }
+    modal.style.display = 'flex';
+  });
+
+  document.getElementById('cfg-verify').addEventListener('click', verifyCfgKey);
+
+  document.getElementById('cfg-cancel').addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
+
+  document.getElementById('cfg-save').addEventListener('click', async () => {
+    const server = cfgServer.value.trim().replace(/\/$/, '') || 'http://localhost:8000';
+    const key    = cfgKey.value.trim();
+    // Verify key before saving — bail if invalid
+    const user = await verifyCfgKey();
+    if (!user) return;   // error already shown in modal
+    localStorage.setItem('pawsec_server',     server);
+    localStorage.setItem('pawsec_api_key',    key);
+    localStorage.setItem('pawsec_user_name',  user.name       || '');
+    localStorage.setItem('pawsec_company_id', user.company_id || '');
+    localStorage.setItem('pawsec_user_email', user.email      || '');
+    modal.style.display = 'none';
+    window.location.reload();
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.style.display = 'none';
+  });
+
+  // ── Clear Local View ──────────────────────────────────────────────────────
+  const CLEARED_KEY = 'pawsec_local_cleared_at';  // ISO timestamp of last clear
+
+  function applyClearedBanner() {
+    const cleared = localStorage.getItem(CLEARED_KEY);
+    const banner  = document.getElementById('local-cleared-banner');
+    if (cleared) {
+      banner.style.display = 'block';
+      document.getElementById('cleared-since').textContent =
+        new Date(cleared).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+
+  function undoClearLocal() {
+    localStorage.removeItem(CLEARED_KEY);
+    applyClearedBanner();
+    refreshSessionsView();
+    window.__pawsec?.reloadStats?.();
+  }
+
+  function refreshSessionsView() {
+    const tryReload = (n) => {
+      if (window.__pawsec?.reloadSessions) {
+        window.__pawsec.reloadSessions();
+      } else if (n > 0) {
+        setTimeout(() => tryReload(n - 1), 100);
+      }
+    };
+    tryReload(20);
+  }
+
+  document.getElementById('clear-local-btn').addEventListener('click', () => {
+    if (!confirm('Clear all records from your local view?\n\nYour dashboard will appear fresh. All data remains safely on the server and is visible to the admin.')) return;
+    localStorage.setItem(CLEARED_KEY, new Date().toISOString());
+    applyClearedBanner();
+    refreshSessionsView();
+    window.__pawsec?.resetStats?.();
+  });
+
+  applyClearedBanner();
+</script>
+</body>
+</html>

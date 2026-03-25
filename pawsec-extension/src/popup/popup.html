@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PawSec</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="pp-fluffy" x="-30%" y="-30%" width="160%" height="160%">
+            <feMorphology operator="dilate" in="SourceAlpha" radius="2.5" result="expanded"/>
+            <feGaussianBlur in="expanded" stdDeviation="2.2" result="blurred"/>
+            <feFlood flood-color="#ffffff" flood-opacity="0.9" result="white"/>
+            <feComposite in="white" in2="blurred" operator="in" result="halo"/>
+            <feMerge><feMergeNode in="halo"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="pp-shadow" x="-25%" y="-20%" width="150%" height="150%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3.5" flood-color="#0f172a" flood-opacity="0.18"/>
+          </filter>
+        </defs>
+        <g filter="url(#pp-shadow)">
+          <g filter="url(#pp-fluffy)">
+            <ellipse cx="50" cy="68" rx="34" ry="28" fill="#ffffff"/>
+            <circle cx="19" cy="47" r="10.5" fill="#ffffff"/>
+            <circle cx="36" cy="31" r="12.5" fill="#ffffff"/>
+            <circle cx="64" cy="31" r="12.5" fill="#ffffff"/>
+            <circle cx="81" cy="47" r="10.5" fill="#ffffff"/>
+          </g>
+        </g>
+        <circle cx="43" cy="72" r="10"  fill="#F2AABD"/>
+        <circle cx="57" cy="72" r="10"  fill="#F2AABD"/>
+        <circle cx="50" cy="64" r="10"  fill="#F2AABD"/>
+        <circle cx="19" cy="47" r="7"   fill="#F2AABD"/>
+        <circle cx="36" cy="31" r="8.5" fill="#F2AABD"/>
+        <circle cx="64" cy="31" r="8.5" fill="#F2AABD"/>
+        <circle cx="81" cy="47" r="7"   fill="#F2AABD"/>
+      </svg>
+      <span>PawSec</span>
+    </div>
+
+    <label class="toggle" title="Enable / disable protection">
+      <input type="checkbox" id="enabled-toggle" checked />
+      <span class="slider"></span>
+    </label>
+  </header>
+
+  <div class="status-row" id="status-row">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">Protected</span>
+  </div>
+
+  <!-- Stats ring cards -->
+  <div class="stats-grid">
+    <div class="stat-card blocked">
+      <span id="stat-blocked">0</span>
+      <small>Blocked</small>
+    </div>
+    <div class="stat-card warned">
+      <span id="stat-warned">0</span>
+      <small>Warned</small>
+    </div>
+    <div class="stat-card total">
+      <span id="stat-total">0</span>
+      <small>Total</small>
+    </div>
+  </div>
+  <div class="stats-clear-row">
+    <button id="clear-stats-btn" class="btn-clear">Clear stats</button>
+  </div>
+
+  <!-- Server status -->
+  <div class="server-row">
+    <div class="server-dot" id="server-dot"></div>
+    <span id="server-label">No server configured</span>
+  </div>
+
+  <!-- User identity (shown when server is connected) -->
+  <div id="user-identity-row" style="display:none;padding:7px 12px;background:#fff8fb;border:1px solid #f0d6e4;border-radius:8px;margin-bottom:10px;font-size:12px;">
+    <div style="color:#a07890;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Signed in as</div>
+    <div style="font-weight:600;color:#2d1f2a;" id="popup-user-name">—</div>
+    <div style="color:#a07890;font-size:11px;" id="popup-user-company"></div>
+  </div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <button id="dashboard-btn" class="btn btn-primary" disabled>Open Dashboard</button>
+    <button id="settings-btn" class="btn btn-secondary">Settings</button>
+  </div>
+</div>
+<script src="popup.js" type="module"></script>
+</body>
+</html>

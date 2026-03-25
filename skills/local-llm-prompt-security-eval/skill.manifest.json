@@ -1,0 +1,118 @@
+{
+  "name": "local-llm-prompt-security-eval",
+  "version": "3.0.0",
+  "description": "Privacy-first prompt security classification using local Ollama LLMs",
+  "author": "Prompt Test Bench Team",
+  "license": "MIT",
+  "type": "interactive",
+  "status": "production",
+
+  "main": "classify_prompt.py",
+
+  "requires": {
+    "python": ">=3.8",
+    "system": {
+      "ollama": ">=0.1.0"
+    },
+    "python_packages": [
+      "requests>=2.31.0",
+      "python-dotenv>=1.0.0"
+    ]
+  },
+
+  "configuration": {
+    "required": false,
+    "template": "config.template.env",
+    "variables": [
+      {
+        "name": "OLLAMA_URL",
+        "description": "Ollama API URL",
+        "default": "http://localhost:11434/api/chat",
+        "required": false
+      },
+      {
+        "name": "OLLAMA_MODEL",
+        "description": "Ollama model name",
+        "default": "qwen2.5-finetuned",
+        "required": false
+      }
+    ]
+  },
+
+  "models": {
+    "recommended": "qwen2.5-finetuned",
+    "alternatives": ["llama2", "mistral", "codellama"],
+    "requirements": "Model must output 6-parameter JSON format"
+  },
+
+  "files": {
+    "documentation": [
+      "README.md",
+      "INSTALL.md",
+      "skill.md"
+    ],
+    "implementation": [
+      "classify_prompt.py"
+    ],
+    "examples": [
+      "examples/basic_usage.py",
+      "examples/batch_processing.py"
+    ],
+    "configuration": [
+      "config.template.env"
+    ]
+  },
+
+  "features": [
+    "Interactive configuration wizard",
+    "Automatic Ollama validation",
+    "Model discovery and selection",
+    "Error recovery with user guidance",
+    "6-parameter security classification",
+    "100% local processing",
+    "No cloud API calls",
+    "Privacy-first architecture"
+  ],
+
+  "output_format": {
+    "type": "json",
+    "schema": {
+      "Intent_Category": "string (Benign|Jailbreak|Harmful|Policy_Violation)",
+      "Generic_Persona_Category": "string (Neutral/Default State|Role_Playing|Identity_Manipulation)",
+      "Pattern": "string (Normal|Configuration probing|Instruction override|Obfuscation)",
+      "Intent_Risk_Severity": "string (Low|Medium|High|Critical)",
+      "Persona_Risk_Severity": "string (Low|Medium|High|Critical)",
+      "Pattern_Risk_Severity": "string (Low|Medium|High|Critical)"
+    }
+  },
+
+  "trigger_phrases": [
+    "classify prompt:",
+    "analyze this prompt:",
+    "check prompt security:",
+    "evaluate prompt risk:",
+    "security analysis:"
+  ],
+
+  "tags": [
+    "security",
+    "classification",
+    "local-llm",
+    "ollama",
+    "privacy",
+    "jailbreak-detection",
+    "prompt-security",
+    "interactive-skill"
+  ],
+
+  "repository": "https://github.com/yourorg/prompt-test-bench",
+  "documentation_url": "https://github.com/yourorg/prompt-test-bench/tree/main/skills/local-llm-prompt-security-eval",
+  "homepage": "https://github.com/yourorg/prompt-test-bench",
+
+  "portable": true,
+  "self_contained": true,
+  "ui_dependencies": false,
+
+  "last_updated": "2026-03-08",
+  "created": "2026-03-08"
+}

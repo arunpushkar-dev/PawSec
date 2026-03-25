@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- PawSec logo — transparent background, cream pad + pink toe beans -->
+
+  <!-- Main pad -->
+  <ellipse cx="50" cy="63" rx="31" ry="27"
+    fill="#FDE8D0" stroke="#E896AF" stroke-width="1.8"/>
+
+  <!-- Far-left toe bean (smaller) -->
+  <ellipse cx="22" cy="41" rx="8" ry="7.5"
+    fill="#F09BAF" stroke="#E896AF" stroke-width="1.5"/>
+
+  <!-- Inner-left toe bean -->
+  <ellipse cx="37" cy="31" rx="10.5" ry="9.8"
+    fill="#F09BAF" stroke="#E896AF" stroke-width="1.5"/>
+
+  <!-- Inner-right toe bean -->
+  <ellipse cx="63" cy="31" rx="10.5" ry="9.8"
+    fill="#F09BAF" stroke="#E896AF" stroke-width="1.5"/>
+
+  <!-- Far-right toe bean (smaller) -->
+  <ellipse cx="78" cy="41" rx="8" ry="7.5"
+    fill="#F09BAF" stroke="#E896AF" stroke-width="1.5"/>
+</svg>

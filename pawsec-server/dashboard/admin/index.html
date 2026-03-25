@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PawSec Admin</title>
+  <link rel="icon" type="image/png" href="../favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-primary:    #fdf6f9;
+      --bg-secondary:  #ffffff;
+      --bg-card:       #fff8fb;
+      --bg-hover:      #fce8f2;
+      --border:        #f0d6e4;
+      --teal:          #c87fa4;
+      --teal-dark:     #a85f84;
+      --teal-glow:     rgba(200, 127, 164, 0.10);
+      --green:         #5db87a;
+      --yellow:        #c99a2e;
+      --orange:        #d4753a;
+      --red:           #d95f5f;
+      --red-dark:      #b83c3c;
+      --text-primary:  #2d1f2a;
+      --text-secondary:#6b4f62;
+      --text-muted:    #b090a0;
+      --font: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+      --radius: 8px;
+      --shadow: 0 4px 16px rgba(200,127,164,0.12);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    a { color: var(--teal); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Header ── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; gap: 12px;
+      padding: 0 20px; height: 56px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 700; font-size: 16px; color: var(--teal);
+    }
+    .logo svg { width: 28px; height: 28px; }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .ws-indicator { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+    .ws-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); transition: background 0.3s; }
+    .ws-dot.connected    { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .ws-dot.reconnecting { background: var(--yellow); animation: pulse 1s infinite; }
+    .ws-dot.error        { background: var(--red); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    @keyframes spin   { to { transform: rotate(360deg); } }
+
+    /* ── Tabs ── */
+    .tabs-bar {
+      display: flex; gap: 0;
+      padding: 0 20px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+    .tab-btn {
+      padding: 12px 18px;
+      background: none; border: none; border-bottom: 2px solid transparent;
+      color: var(--text-secondary); font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: color 0.15s, border-color 0.15s;
+    }
+    .tab-btn:hover  { color: var(--text-primary); }
+    .tab-btn.active { color: var(--teal); border-bottom-color: var(--teal); }
+
+    /* ── Main content ── */
+    .tab-panel { display: none; padding: 24px 20px; }
+    .tab-panel.active { display: block; }
+
+    /* ── Buttons ── */
+    .btn {
+      padding: 7px 14px; border-radius: var(--radius);
+      border: 1px solid var(--border); background: var(--bg-card);
+      color: var(--text-primary); font-size: 13px; cursor: pointer;
+      transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn:hover           { border-color: var(--teal); color: var(--teal); }
+    .btn.btn-teal        { background: var(--teal); border-color: var(--teal); color: #fff; font-weight: 600; }
+    .btn.btn-teal:hover  { background: var(--teal-dark); border-color: var(--teal-dark); }
+    .btn.btn-danger      { border-color: var(--red); color: var(--red); }
+    .btn.btn-danger:hover{ background: rgba(248,81,73,.1); }
+    .btn.btn-sm          { padding: 4px 10px; font-size: 12px; }
+
+    /* ── Stats cards ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px; margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 20px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .stat-card .stat-value {
+      font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1;
+    }
+    .stat-card .stat-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+    .stat-card.total   .stat-value { color: var(--teal); }
+    .stat-card.users   .stat-value { color: var(--teal); }
+    .stat-card.blocked .stat-value { color: var(--red); }
+    .stat-card.warned  .stat-value { color: var(--yellow); }
+    .stat-card.allowed .stat-value { color: var(--green); }
+
+    /* ── Section header ── */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .section-header h2 { font-size: 15px; font-weight: 600; }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--bg-secondary); }
+    th {
+      padding: 10px 14px; text-align: left;
+      font-size: 11px; font-weight: 600;
+      color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 10px 14px; font-size: 13px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--bg-hover); }
+    td.muted { color: var(--text-secondary); }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 10px;
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .badge.active   { background: rgba(93,184,122,.15);  color: var(--green); }
+    .badge.inactive { background: rgba(217,95,95,.15);   color: var(--red); }
+    .badge.blocked  { background: rgba(217,95,95,.15);   color: var(--red); }
+    .badge.warned   { background: rgba(201,154,46,.15);  color: var(--yellow); }
+    .badge.allowed  { background: rgba(93,184,122,.15);  color: var(--green); }
+    .badge.admin    { background: rgba(200,127,164,.15); color: var(--teal); }
+
+    /* ── API key display ── */
+    .api-key-cell { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 12px; }
+    .api-key-masked { color: var(--text-muted); }
+    .copy-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px 4px; border-radius: 4px; }
+    .copy-btn:hover { color: var(--teal); }
+
+    /* ── Modal overlay ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(200,127,164,0.25); backdrop-filter: blur(4px); z-index: 500;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 28px 32px;
+      width: 460px; max-width: 95vw; box-shadow: var(--shadow);
+    }
+    .modal h3 { font-size: 16px; margin-bottom: 6px; }
+    .modal p.sub { font-size: 12px; color: var(--text-secondary); margin-bottom: 18px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text-primary); padding: 8px 10px;
+      font-size: 13px; outline: none; font-family: var(--font);
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--teal); }
+    .form-group textarea { resize: vertical; min-height: 60px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .toggle-wrap { display: flex; align-items: center; gap: 10px; }
+    .toggle {
+      width: 36px; height: 20px; border-radius: 10px; background: var(--border);
+      position: relative; cursor: pointer; border: none; transition: background 0.2s;
+    }
+    .toggle.on { background: var(--teal); }
+    .toggle::after {
+      content: ''; position: absolute; top: 3px; left: 3px;
+      width: 14px; height: 14px; border-radius: 50%; background: #fff;
+      transition: left 0.2s;
+    }
+    .toggle.on::after { left: 19px; }
+
+    /* ── Filters ── */
+    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+    .filter-bar select, .filter-bar input[type=date] {
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text-primary); padding: 6px 10px;
+      font-size: 12px; outline: none;
+    }
+    .filter-bar select:focus, .filter-bar input[type=date]:focus { border-color: var(--teal); }
+
+    /* ── Expandable rows ── */
+    .expandable-row { cursor: pointer; }
+    .expandable-row:hover { background: var(--bg-hover); }
+    .expand-detail {
+      display: none; background: var(--bg-primary);
+      padding: 14px 20px; border-bottom: 1px solid var(--border);
+    }
+    .expand-detail.open { display: table-row; }
+    .expand-detail td { padding: 14px 20px; }
+    .detail-json {
+      font-family: var(--mono); font-size: 11px; color: var(--text-secondary);
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: 6px; padding: 10px; max-height: 200px; overflow-y: auto;
+      white-space: pre-wrap; word-break: break-all;
+    }
+
+    /* ── Spinner ── */
+    .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--teal); border-radius: 50%; animation: spin 0.6s linear infinite; }
+    .loading-row td { text-align: center; padding: 32px; color: var(--text-muted); }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar       { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* ── New prompt flash ── */
+    @keyframes flash { 0%{background:var(--teal-glow)} 100%{background:transparent} }
+
+    .flash-row { animation: flash 1.5s ease-out; }
+
+    /* ── Pagination ── */
+    .pagination { display: flex; gap: 8px; align-items: center; margin-top: 14px; justify-content: flex-end; }
+    .page-info { font-size: 12px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ HEADER ═══════════════════════════════════ -->
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <filter id="adm-fluffy" x="-30%" y="-30%" width="160%" height="160%">
+          <feMorphology operator="dilate" in="SourceAlpha" radius="2.5" result="expanded"/>
+          <feGaussianBlur in="expanded" stdDeviation="2.2" result="blurred"/>
+          <feFlood flood-color="#ffffff" flood-opacity="0.9" result="white"/>
+          <feComposite in="white" in2="blurred" operator="in" result="halo"/>
+          <feMerge><feMergeNode in="halo"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="adm-shadow" x="-25%" y="-20%" width="150%" height="150%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3.5" flood-color="#0f172a" flood-opacity="0.18"/>
+        </filter>
+      </defs>
+      <g filter="url(#adm-shadow)">
+        <g filter="url(#adm-fluffy)">
+          <ellipse cx="50" cy="68" rx="34" ry="28" fill="#ffffff"/>
+          <circle cx="19" cy="47" r="10.5" fill="#ffffff"/>
+          <circle cx="36" cy="31" r="12.5" fill="#ffffff"/>
+          <circle cx="64" cy="31" r="12.5" fill="#ffffff"/>
+          <circle cx="81" cy="47" r="10.5" fill="#ffffff"/>
+        </g>
+      </g>
+      <circle cx="43" cy="72" r="10"  fill="#F2AABD"/>
+      <circle cx="57" cy="72" r="10"  fill="#F2AABD"/>
+      <circle cx="50" cy="64" r="10"  fill="#F2AABD"/>
+      <circle cx="19" cy="47" r="7"   fill="#F2AABD"/>
+      <circle cx="36" cy="31" r="8.5" fill="#F2AABD"/>
+      <circle cx="64" cy="31" r="8.5" fill="#F2AABD"/>
+      <circle cx="81" cy="47" r="7"   fill="#F2AABD"/>
+    </svg>
+    PawSec Admin
+  </div>
+  <span style="color:var(--text-muted);font-size:12px;margin-left:4px;">Enterprise Management</span>
+  <div class="header-right">
+    <div class="ws-indicator">
+      <div class="ws-dot" id="ws-dot"></div>
+      <span id="ws-label">Connecting...</span>
+    </div>
+    <span id="user-info" style="font-size:12px;color:var(--text-secondary);"></span>
+    <a href="/dashboard" style="font-size:12px;color:var(--text-secondary);">User Dashboard</a>
+    <button id="settings-btn" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-secondary);cursor:pointer;padding:4px 10px;font-size:12px;">Settings</button>
+  </div>
+</header>
+
+<!-- ════════════════════════════ SETTINGS MODAL ══════════════════════════════ -->
+<div id="settings-modal" class="modal-overlay">
+  <div class="modal">
+    <h3>Dashboard Settings</h3>
+    <p class="sub">No API key needed — admin access is granted automatically from localhost.</p>
+    <div class="form-group">
+      <label>Server URL</label>
+      <input id="cfg-server" type="text" placeholder="http://localhost:8000" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="cfg-cancel">Cancel</button>
+      <button class="btn btn-teal" id="cfg-save">Save and Reconnect</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ TABS ═════════════════════════════════════ -->
+<div class="tabs-bar">
+  <button class="tab-btn active" data-tab="overview">Overview</button>
+  <button class="tab-btn" data-tab="users">Users</button>
+  <button class="tab-btn" data-tab="audit">Audit Log</button>
+</div>
+
+<!-- ═══════════════════════════ OVERVIEW TAB ════════════════════════════════ -->
+<div id="tab-overview" class="tab-panel active">
+  <div class="stats-grid" id="overview-stats">
+    <div class="stat-card users">
+      <span class="stat-value" id="ov-users">—</span>
+      <span class="stat-label">Total Users</span>
+    </div>
+    <div class="stat-card total">
+      <span class="stat-value" id="ov-total">—</span>
+      <span class="stat-label">Total Prompts</span>
+    </div>
+    <div class="stat-card blocked">
+      <span class="stat-value" id="ov-blocked">—</span>
+      <span class="stat-label">Blocked</span>
+    </div>
+    <div class="stat-card warned">
+      <span class="stat-value" id="ov-warned">—</span>
+      <span class="stat-label">Warned</span>
+    </div>
+    <div class="stat-card allowed">
+      <span class="stat-value" id="ov-allowed">—</span>
+      <span class="stat-label">Allowed</span>
+    </div>
+  </div>
+
+  <div class="section-header"><h2>Per-User Breakdown</h2></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th><th>Company ID</th><th>Email</th>
+          <th>Blocked</th><th>Warned</th><th>Allowed</th><th>Last Active</th>
+        </tr>
+      </thead>
+      <tbody id="overview-table"><tr class="loading-row"><td colspan="7"><div class="spinner" style="margin:auto;"></div></td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ USERS TAB ═══════════════════════════════════ -->
+<div id="tab-users" class="tab-panel">
+  <div class="section-header">
+    <h2>API Key Users</h2>
+    <button class="btn btn-teal" id="add-user-btn">+ Add User</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th><th>Company ID</th><th>Email</th>
+          <th>API Key</th><th>Status</th><th>Created</th><th>Last Used</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="users-table"><tr class="loading-row"><td colspan="8"><div class="spinner" style="margin:auto;"></div></td></tr></tbody>
+    </table>
+  </div>
+  <div class="pagination" id="users-pagination"></div>
+</div>
+
+<!-- ═══════════════════════════ AUDIT LOG TAB ════════════════════════════════ -->
+<div id="tab-audit" class="tab-panel">
+  <div class="filter-bar">
+    <select id="audit-user-filter"><option value="">All Users</option></select>
+    <select id="audit-platform-filter">
+      <option value="">All Platforms</option>
+      <option value="chatgpt.com">ChatGPT</option>
+      <option value="claude.ai">Claude</option>
+      <option value="gemini.google.com">Gemini</option>
+      <option value="www.perplexity.ai">Perplexity</option>
+      <option value="copilot.microsoft.com">Copilot</option>
+      <option value="x.com">Grok</option>
+      <option value="unknown">Unknown</option>
+    </select>
+    <select id="audit-action-filter">
+      <option value="">All Actions</option>
+      <option value="BLOCKED">Blocked</option>
+      <option value="WARNED">Warned</option>
+    </select>
+    <input type="date" id="audit-date-from" />
+    <input type="date" id="audit-date-to" />
+    <button class="btn btn-sm" id="audit-apply">Apply</button>
+    <button class="btn btn-sm" id="audit-reset">Reset</button>
+  </div>
+  <div class="table-wrap">
+    <table id="audit-table-el">
+      <thead>
+        <tr>
+          <th></th><th>Timestamp</th><th>User</th><th>Platform</th>
+          <th>Masked Text</th><th>Risk Score</th><th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="audit-table"><tr class="loading-row"><td colspan="7"><div class="spinner" style="margin:auto;"></div></td></tr></tbody>
+    </table>
+  </div>
+  <div class="pagination" id="audit-pagination"></div>
+</div>
+
+<!-- ═════════════════════════ ADD USER MODAL ════════════════════════════════ -->
+<div id="add-user-modal" class="modal-overlay">
+  <div class="modal">
+    <h3>Add User</h3>
+    <p class="sub">A new API key will be generated automatically.</p>
+    <div class="form-group">
+      <label>Full Name *</label>
+      <input id="new-name" type="text" placeholder="Jane Smith" />
+    </div>
+    <div class="form-group">
+      <label>Email *</label>
+      <input id="new-email" type="email" placeholder="jane@company.com" />
+    </div>
+    <div class="form-group">
+      <label>Company ID</label>
+      <input id="new-company" type="text" placeholder="ACME" />
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="new-notes" placeholder="Optional notes..."></textarea>
+    </div>
+    <div id="add-user-error" style="color:var(--red);font-size:12px;display:none;margin-bottom:8px;"></div>
+    <div class="modal-actions">
+      <button class="btn" id="add-user-cancel">Cancel</button>
+      <button class="btn btn-teal" id="add-user-submit">Create User</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════ EDIT USER MODAL ═══════════════════════════════ -->
+<div id="edit-user-modal" class="modal-overlay">
+  <div class="modal">
+    <h3>Edit User</h3>
+    <p class="sub"></p>
+    <input type="hidden" id="edit-user-id" />
+    <div class="form-group">
+      <label>Full Name</label>
+      <input id="edit-name" type="text" />
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input id="edit-email" type="email" />
+    </div>
+    <div class="form-group">
+      <label>Company ID</label>
+      <input id="edit-company" type="text" />
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="edit-notes"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Status</label>
+      <div class="toggle-wrap">
+        <button class="toggle on" id="edit-active-toggle" type="button"></button>
+        <span id="edit-active-label" style="font-size:13px;color:var(--text-secondary);">Active</span>
+      </div>
+    </div>
+    <div id="edit-user-error" style="color:var(--red);font-size:12px;display:none;margin-bottom:8px;"></div>
+    <div class="modal-actions">
+      <button class="btn" id="edit-user-cancel">Cancel</button>
+      <button class="btn btn-teal" id="edit-user-submit">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ ROTATE KEY MODAL ════════════════════════════════ -->
+<div id="rotate-modal" class="modal-overlay">
+  <div class="modal">
+    <h3>New API Key Generated</h3>
+    <p class="sub">This key will only be shown once. Copy it now and share it securely.</p>
+    <div class="form-group">
+      <label>New API Key</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="rotate-key-display" type="text" readonly style="font-family:var(--mono);font-size:12px;" />
+        <button class="btn btn-sm" id="rotate-copy-btn">Copy</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-teal" id="rotate-close">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ CONFIRM DELETE MODAL ════════════════════════════ -->
+<div id="confirm-modal" class="modal-overlay">
+  <div class="modal">
+    <h3 id="confirm-title">Confirm Action</h3>
+    <p class="sub" id="confirm-message"></p>
+    <div class="modal-actions">
+      <button class="btn" id="confirm-cancel">Cancel</button>
+      <button class="btn btn-danger" id="confirm-ok">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+//  Config
+// ─────────────────────────────────────────────────────────────────────────────
+const params   = new URLSearchParams(window.location.search);
+let API_BASE = params.get('server') || localStorage.getItem('pawsec_server') || '';
+// No API key needed when accessing from localhost (server applies trusted bypass)
+let API_KEY  = params.get('key') || '';
+const WS_URL   = () => (API_BASE ? API_BASE.replace(/^http/, 'ws') : `ws://${location.host}`) +
+                       '/ws/dashboard' + (API_KEY ? `?token=${API_KEY}` : '');
+
+function headers() {
+  const h = { 'Content-Type': 'application/json' };
+  if (API_KEY) h['X-API-Key'] = API_KEY;
+  return h;
+}
+
+async function apiFetch(path, opts = {}) {
+  const res = await fetch(API_BASE + path, { ...opts, headers: { ...headers(), ...(opts.headers || {}) } });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.detail?.message || err?.detail || `HTTP ${res.status}`);
+  }
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Settings modal
+// ─────────────────────────────────────────────────────────────────────────────
+const settingsModal = document.getElementById('settings-modal');
+document.getElementById('settings-btn').addEventListener('click', () => {
+  document.getElementById('cfg-server').value = localStorage.getItem('pawsec_server') || 'http://localhost:8000';
+  settingsModal.classList.add('open');
+});
+document.getElementById('cfg-cancel').addEventListener('click', () => settingsModal.classList.remove('open'));
+document.getElementById('cfg-save').addEventListener('click', () => {
+  const s = document.getElementById('cfg-server').value.trim().replace(/\/$/, '') || 'http://localhost:8000';
+  localStorage.setItem('pawsec_server', s);
+  window.location.reload();
+});
+settingsModal.addEventListener('click', e => { if (e.target === settingsModal) settingsModal.classList.remove('open'); });
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Tab navigation
+// ─────────────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const panel = document.getElementById('tab-' + btn.dataset.tab);
+    if (panel) panel.classList.add('active');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Helper: format dates
+// ─────────────────────────────────────────────────────────────────────────────
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString(undefined, { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+function maskApiKey(key) {
+  if (!key) return '—';
+  return key.slice(0, 8) + '••••••••' + key.slice(-4);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Load user info
+// ─────────────────────────────────────────────────────────────────────────────
+async function loadMe() {
+  try {
+    const me = await apiFetch('/api/v1/me');
+    const company = me.company_id ? ` · ${me.company_id}` : '';
+    document.getElementById('user-info').textContent = `${me.name}${company} (${me.email})`;
+  } catch (_) {}
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Overview tab
+// ─────────────────────────────────────────────────────────────────────────────
+async function loadOverview() {
+  try {
+    const data = await apiFetch('/api/v1/admin/stats');
+    document.getElementById('ov-users').textContent   = data.total_users;
+    document.getElementById('ov-total').textContent   = data.total_prompts;
+    document.getElementById('ov-blocked').textContent = data.blocked;
+    document.getElementById('ov-warned').textContent  = data.warned;
+    document.getElementById('ov-allowed').textContent = data.allowed;
+
+    const tbody = document.getElementById('overview-table');
+    if (!data.per_user || data.per_user.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">No users yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.per_user.map(u => `
+      <tr>
+        <td>${esc(u.name)}</td>
+        <td class="muted">${esc(u.company_id || '—')}</td>
+        <td class="muted">${esc(u.email)}</td>
+        <td><span style="color:var(--red);font-weight:600;">${u.blocked}</span></td>
+        <td><span style="color:var(--yellow);font-weight:600;">${u.warned}</span></td>
+        <td><span style="color:var(--green);font-weight:600;">${u.allowed}</span></td>
+        <td class="muted">${fmtDate(u.last_active)}</td>
+      </tr>`).join('');
+  } catch (err) {
+    document.getElementById('overview-table').innerHTML =
+      `<tr><td colspan="7" style="text-align:center;color:var(--red);padding:24px;">Error: ${esc(err.message)}</td></tr>`;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Users tab
+// ─────────────────────────────────────────────────────────────────────────────
+let usersPage = 1;
+const USERS_PAGE_SIZE = 50;
+
+async function loadUsers(page = 1) {
+  usersPage = page;
+  const tbody = document.getElementById('users-table');
+  tbody.innerHTML = '<tr class="loading-row"><td colspan="8"><div class="spinner" style="margin:auto;"></div></td></tr>';
+  try {
+    const data = await apiFetch(`/api/v1/admin/users?page=${page}&page_size=${USERS_PAGE_SIZE}`);
+    renderUsersTable(data.users);
+    renderPagination('users-pagination', data.total, USERS_PAGE_SIZE, page, loadUsers);
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--red);padding:24px;">Error: ${esc(err.message)}</td></tr>`;
+  }
+}
+
+// Global user cache — keyed by user_id so onclick can safely pass just the ID
+const _usersCache = {};
+
+function renderUsersTable(users) {
+  const tbody = document.getElementById('users-table');
+  if (!users || users.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:24px;">No users found.</td></tr>';
+    return;
+  }
+  // Populate cache so onclick handlers can look up full user object by ID
+  users.forEach(u => { _usersCache[u.user_id] = u; });
+  tbody.innerHTML = users.map(u => `
+    <tr id="user-row-${esc(u.user_id)}">
+      <td>
+        ${esc(u.name)}
+        ${u.is_admin ? '<span class="badge admin" style="margin-left:6px;">Admin</span>' : ''}
+      </td>
+      <td class="muted">${esc(u.company_id || '—')}</td>
+      <td class="muted">${esc(u.email)}</td>
+      <td>
+        <div class="api-key-cell">
+          <span class="api-key-masked" id="key-display-${esc(u.user_id)}">${maskApiKey(u.api_key)}</span>
+          <button class="copy-btn" title="Show/Copy" onclick="toggleKey('${esc(u.user_id)}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+      </td>
+      <td><span class="badge ${u.is_active ? 'active' : 'inactive'}">${u.is_active ? 'Active' : 'Inactive'}</span></td>
+      <td class="muted">${fmtDate(u.created_at)}</td>
+      <td class="muted">${fmtDate(u.last_used_at)}</td>
+      <td>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-sm" onclick="openEditModal(_usersCache['${esc(u.user_id)}'])">Edit</button>
+          <button class="btn btn-sm" onclick="rotateKey('${esc(u.user_id)}', '${esc(u.name)}')">Rotate Key</button>
+          <button class="btn btn-sm" style="border-color:var(--orange);color:var(--orange);" onclick="clearUserRecords('${esc(u.user_id)}', '${esc(u.name)}')">Clear Records</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteUser('${esc(u.user_id)}', '${esc(u.name)}')">Delete</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+let keyVisible = {};
+function toggleKey(userId) {
+  const u = _usersCache[userId];
+  if (!u) return;
+  const el = document.getElementById('key-display-' + userId);
+  if (!el) return;
+  keyVisible[userId] = !keyVisible[userId];
+  el.textContent = keyVisible[userId] ? u.api_key : maskApiKey(u.api_key);
+  if (keyVisible[userId]) {
+    navigator.clipboard.writeText(u.api_key).catch(() => {});
+    el.style.color = 'var(--teal)';
+    setTimeout(() => { el.style.color = ''; }, 1500);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Add User
+// ─────────────────────────────────────────────────────────────────────────────
+const addModal = document.getElementById('add-user-modal');
+document.getElementById('add-user-btn').addEventListener('click', () => {
+  document.getElementById('new-name').value = '';
+  document.getElementById('new-email').value = '';
+  document.getElementById('new-company').value = '';
+  document.getElementById('new-notes').value = '';
+  document.getElementById('add-user-error').style.display = 'none';
+  addModal.classList.add('open');
+});
+document.getElementById('add-user-cancel').addEventListener('click', () => addModal.classList.remove('open'));
+addModal.addEventListener('click', e => { if (e.target === addModal) addModal.classList.remove('open'); });
+
+document.getElementById('add-user-submit').addEventListener('click', async () => {
+  const name    = document.getElementById('new-name').value.trim();
+  const email   = document.getElementById('new-email').value.trim();
+  const company = document.getElementById('new-company').value.trim();
+  const notes   = document.getElementById('new-notes').value.trim();
+  const errEl   = document.getElementById('add-user-error');
+
+  if (!name || !email) {
+    errEl.textContent = 'Name and Email are required.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  try {
+    await apiFetch('/api/v1/admin/users', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, company_id: company || null, notes: notes || null }),
+    });
+    addModal.classList.remove('open');
+    loadUsers(usersPage);
+    loadOverview();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Edit User
+// ─────────────────────────────────────────────────────────────────────────────
+const editModal = document.getElementById('edit-user-modal');
+let editActiveState = true;
+
+function openEditModal(user) {
+  document.getElementById('edit-user-id').value    = user.user_id;
+  document.getElementById('edit-name').value       = user.name || '';
+  document.getElementById('edit-email').value      = user.email || '';
+  document.getElementById('edit-company').value    = user.company_id || '';
+  document.getElementById('edit-notes').value      = user.notes || '';
+  editActiveState = user.is_active;
+  const toggle = document.getElementById('edit-active-toggle');
+  toggle.className = 'toggle' + (editActiveState ? ' on' : '');
+  document.getElementById('edit-active-label').textContent = editActiveState ? 'Active' : 'Inactive';
+  document.getElementById('edit-user-error').style.display = 'none';
+  editModal.classList.add('open');
+}
+
+document.getElementById('edit-active-toggle').addEventListener('click', () => {
+  editActiveState = !editActiveState;
+  const toggle = document.getElementById('edit-active-toggle');
+  toggle.className = 'toggle' + (editActiveState ? ' on' : '');
+  document.getElementById('edit-active-label').textContent = editActiveState ? 'Active' : 'Inactive';
+});
+
+document.getElementById('edit-user-cancel').addEventListener('click', () => editModal.classList.remove('open'));
+editModal.addEventListener('click', e => { if (e.target === editModal) editModal.classList.remove('open'); });
+
+document.getElementById('edit-user-submit').addEventListener('click', async () => {
+  const userId  = document.getElementById('edit-user-id').value;
+  const name    = document.getElementById('edit-name').value.trim();
+  const email   = document.getElementById('edit-email').value.trim();
+  const company = document.getElementById('edit-company').value.trim();
+  const notes   = document.getElementById('edit-notes').value.trim();
+  const errEl   = document.getElementById('edit-user-error');
+  errEl.style.display = 'none';
+  try {
+    await apiFetch(`/api/v1/admin/users/${userId}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: name || null,
+        email: email || null,
+        company_id: company || null,
+        is_active: editActiveState,
+        notes: notes || null,
+      }),
+    });
+    editModal.classList.remove('open');
+    loadUsers(usersPage);
+    loadOverview();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Rotate Key
+// ─────────────────────────────────────────────────────────────────────────────
+const rotateModal = document.getElementById('rotate-modal');
+document.getElementById('rotate-close').addEventListener('click', () => {
+  rotateModal.classList.remove('open');
+  loadUsers(usersPage);
+});
+
+async function rotateKey(userId, userName) {
+  showConfirm(
+    'Rotate API Key',
+    `Generate a new API key for "${userName}"? The old key will stop working immediately.`,
+    async () => {
+      try {
+        const user = await apiFetch(`/api/v1/admin/users/${userId}/rotate-key`, { method: 'POST' });
+        if (_usersCache[userId]) _usersCache[userId].api_key = user.api_key;
+        document.getElementById('rotate-key-display').value = user.api_key;
+        rotateModal.classList.add('open');
+      } catch (err) {
+        alert('Error rotating key: ' + err.message);
+      }
+    }
+  );
+}
+
+document.getElementById('rotate-copy-btn').addEventListener('click', () => {
+  const val = document.getElementById('rotate-key-display').value;
+  navigator.clipboard.writeText(val).then(() => {
+    document.getElementById('rotate-copy-btn').textContent = 'Copied!';
+    setTimeout(() => { document.getElementById('rotate-copy-btn').textContent = 'Copy'; }, 2000);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Delete User
+// ─────────────────────────────────────────────────────────────────────────────
+async function deleteUser(userId, userName) {
+  showConfirm(
+    'Delete User',
+    `Permanently delete "${userName}"? This cannot be undone.`,
+    async () => {
+      try {
+        await apiFetch(`/api/v1/admin/users/${userId}`, { method: 'DELETE' });
+        loadUsers(usersPage);
+        loadOverview();
+      } catch (err) {
+        alert('Error deleting user: ' + err.message);
+      }
+    }
+  );
+}
+
+async function clearUserRecords(userId, userName) {
+  showConfirm(
+    'Clear User Records',
+    `Permanently delete all prompt records for "${userName}" from the server? Sessions will remain but their history will be wiped. This cannot be undone.`,
+    async () => {
+      try {
+        const res = await apiFetch(`/api/v1/admin/users/${userId}/records`, { method: 'DELETE' });
+        alert(`Cleared ${res.deleted ?? 0} prompt record(s) for ${userName}.`);
+        loadUsers(usersPage);
+        loadOverview();
+      } catch (err) {
+        alert('Error clearing records: ' + err.message);
+      }
+    }
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Confirm modal helper
+// ─────────────────────────────────────────────────────────────────────────────
+const confirmModal = document.getElementById('confirm-modal');
+let confirmCallback = null;
+function showConfirm(title, message, onOk) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-message').textContent = message;
+  confirmCallback = onOk;
+  confirmModal.classList.add('open');
+}
+document.getElementById('confirm-cancel').addEventListener('click', () => confirmModal.classList.remove('open'));
+document.getElementById('confirm-ok').addEventListener('click', async () => {
+  confirmModal.classList.remove('open');
+  if (confirmCallback) await confirmCallback();
+  confirmCallback = null;
+});
+confirmModal.addEventListener('click', e => { if (e.target === confirmModal) confirmModal.classList.remove('open'); });
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Audit Log tab
+// ─────────────────────────────────────────────────────────────────────────────
+let auditPage = 1;
+const AUDIT_PAGE_SIZE = 50;
+let auditSessions = [];
+let auditUsersMap = {};
+
+async function loadAuditUsers() {
+  try {
+    const data = await apiFetch('/api/v1/admin/users?page=1&page_size=200');
+    auditUsersMap = {};
+    const sel = document.getElementById('audit-user-filter');
+    sel.innerHTML = '<option value="">All Users</option>';
+    (data.users || []).forEach(u => {
+      auditUsersMap[u.user_id] = u.name;
+      const opt = document.createElement('option');
+      opt.value = u.user_id;
+      opt.textContent = `${u.name} (${u.email})`;
+      sel.appendChild(opt);
+    });
+  } catch (_) {}
+}
+
+async function loadAudit(page = 1) {
+  auditPage = page;
+  const tbody = document.getElementById('audit-table');
+  tbody.innerHTML = '<tr class="loading-row"><td colspan="7"><div class="spinner" style="margin:auto;"></div></td></tr>';
+  try {
+    const data = await apiFetch(`/api/v1/admin/sessions?page=${page}&page_size=${AUDIT_PAGE_SIZE}`);
+    auditSessions = data.sessions || [];
+    renderAuditTable(applyAuditFilters(auditSessions));
+    renderPagination('audit-pagination', data.total, AUDIT_PAGE_SIZE, page, loadAudit);
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--red);padding:24px;">Error: ${esc(err.message)}</td></tr>`;
+  }
+}
+
+function applyAuditFilters(sessions) {
+  const userFilter     = document.getElementById('audit-user-filter').value;
+  const platformFilter = document.getElementById('audit-platform-filter').value;
+  const actionFilter   = document.getElementById('audit-action-filter').value;
+  const dateFrom       = document.getElementById('audit-date-from').value;
+  const dateTo         = document.getElementById('audit-date-to').value;
+
+  return sessions.filter(s => {
+    if (userFilter && s.user_id !== userFilter) return false;
+    if (platformFilter && (s.platform || 'unknown').toLowerCase() !== platformFilter.toLowerCase()) return false;
+    if (actionFilter) {
+      const hasAction =
+        (actionFilter === 'BLOCKED' && s.blocked_count > 0) ||
+        (actionFilter === 'WARNED'  && s.warned_count  > 0) ||
+        (actionFilter === 'ALLOWED' && s.allowed_count > 0);
+      if (!hasAction) return false;
+    }
+    if (dateFrom && new Date(s.started_at) < new Date(dateFrom)) return false;
+    if (dateTo   && new Date(s.started_at) > new Date(dateTo + 'T23:59:59')) return false;
+    return true;
+  });
+}
+
+function renderAuditTable(sessions) {
+  const tbody = document.getElementById('audit-table');
+  if (!sessions || sessions.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">No sessions match the current filters.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = sessions.map(s => {
+    const dominantAction = s.blocked_count > 0 ? 'BLOCKED' : s.warned_count > 0 ? 'WARNED' : 'ALLOWED';
+    const userName = s.user_name || auditUsersMap[s.user_id] || s.user_id || '—';
+    const rowId = 'audit-row-' + s.session_id.replace(/-/g, '');
+    const detailId = 'audit-detail-' + s.session_id.replace(/-/g, '');
+    return `
+      <tr class="expandable-row" onclick="toggleAuditRow('${rowId}','${detailId}','${esc(s.session_id)}')">
+        <td style="color:var(--text-muted);font-size:12px;">▶</td>
+        <td style="font-family:var(--mono);font-size:12px;color:var(--text-secondary);">${fmtDate(s.started_at)}</td>
+        <td>${esc(userName)}</td>
+        <td class="muted">${esc(s.platform || 'unknown')}</td>
+        <td class="muted" style="font-family:var(--mono);font-size:11px;">Session ${esc(s.session_id.slice(0,8))}…</td>
+        <td>
+          <span style="color:var(--red);">${s.blocked_count}B</span>
+          <span style="color:var(--yellow);margin-left:4px;">${s.warned_count}W</span>
+          <span style="color:var(--green);margin-left:4px;">${s.allowed_count}A</span>
+        </td>
+        <td><span class="badge ${dominantAction.toLowerCase()}">${dominantAction}</span></td>
+      </tr>
+      <tr id="${detailId}" style="display:none;">
+        <td colspan="7">
+          <div class="detail-json" id="${detailId}-content">Loading...</div>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+async function toggleAuditRow(rowId, detailId, sessionId) {
+  const detailRow = document.getElementById(detailId);
+  if (!detailRow) return;
+  const isOpen = detailRow.style.display !== 'none';
+  if (isOpen) {
+    detailRow.style.display = 'none';
+    return;
+  }
+  detailRow.style.display = 'table-row';
+  const contentEl = document.getElementById(detailId + '-content');
+  try {
+    const data = await apiFetch(`/api/v1/sessions/${sessionId}`);
+    contentEl.textContent = JSON.stringify(data, null, 2);
+  } catch (err) {
+    contentEl.textContent = 'Error loading details: ' + err.message;
+  }
+}
+
+document.getElementById('audit-apply').addEventListener('click', () => {
+  renderAuditTable(applyAuditFilters(auditSessions));
+});
+document.getElementById('audit-reset').addEventListener('click', () => {
+  document.getElementById('audit-user-filter').value = '';
+  document.getElementById('audit-platform-filter').value = '';
+  document.getElementById('audit-action-filter').value = '';
+  document.getElementById('audit-date-from').value = '';
+  document.getElementById('audit-date-to').value = '';
+  renderAuditTable(auditSessions);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Pagination helper
+// ─────────────────────────────────────────────────────────────────────────────
+function renderPagination(containerId, total, pageSize, currentPage, loadFn) {
+  const container = document.getElementById(containerId);
+  const totalPages = Math.ceil(total / pageSize);
+  if (totalPages <= 1) { container.innerHTML = ''; return; }
+  container.innerHTML = `
+    <button class="btn btn-sm" ${currentPage <= 1 ? 'disabled' : ''} onclick="(${loadFn.name})(${currentPage - 1})">Prev</button>
+    <span class="page-info">Page ${currentPage} of ${totalPages} (${total} total)</span>
+    <button class="btn btn-sm" ${currentPage >= totalPages ? 'disabled' : ''} onclick="(${loadFn.name})(${currentPage + 1})">Next</button>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  XSS-safe escape
+// ─────────────────────────────────────────────────────────────────────────────
+function esc(str) {
+  if (str == null) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  WebSocket
+// ─────────────────────────────────────────────────────────────────────────────
+let ws = null;
+let wsReconnectTimer = null;
+
+function connectWS() {
+  const dot   = document.getElementById('ws-dot');
+  const label = document.getElementById('ws-label');
+  dot.className = 'ws-dot reconnecting';
+  label.textContent = 'Connecting…';
+
+  ws = new WebSocket(WS_URL());
+  ws.onopen = () => {
+    dot.className = 'ws-dot connected';
+    label.textContent = 'Live';
+  };
+  ws.onmessage = (ev) => {
+    try {
+      const msg = JSON.parse(ev.data);
+      if (msg.event === 'new_prompt') {
+        handleNewPromptWS(msg);
+      }
+    } catch (_) {}
+  };
+  ws.onclose = () => {
+    dot.className = 'ws-dot error';
+    label.textContent = 'Offline';
+    wsReconnectTimer = setTimeout(connectWS, 5000);
+  };
+  ws.onerror = () => {
+    dot.className = 'ws-dot error';
+    label.textContent = 'Error';
+  };
+}
+
+function handleNewPromptWS(msg) {
+  // Refresh overview stats
+  loadOverview();
+  // Reload the audit table from the server so session rows update in-place
+  // (inserting a separate live row would duplicate the session entry)
+  const activeTab = document.querySelector('.tab-btn.active');
+  if (activeTab && activeTab.dataset.tab === 'audit') {
+    loadAudit(auditPage);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Boot
+// ─────────────────────────────────────────────────────────────────────────────
+async function init() {
+  await loadMe();
+  await loadOverview();
+  await loadUsers(1);
+  await loadAuditUsers();
+  await loadAudit(1);
+  connectWS();
+}
+
+init();
+
+// ── Always-on auto-refresh every 30 s ────────────────────────────────────────
+const ADMIN_POLL_MS = 30_000;
+setInterval(async () => {
+  // Overview stats always refresh
+  loadOverview();
+  // Refresh whichever tab is currently visible
+  const activeTab = document.querySelector('.tab-btn.active');
+  if (!activeTab) return;
+  switch (activeTab.dataset.tab) {
+    case 'audit': loadAudit(auditPage); break;
+    case 'users': loadUsers(usersPage); break;
+  }
+}, ADMIN_POLL_MS);
+</script>
+</body>
+</html>

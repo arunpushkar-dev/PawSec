@@ -1,0 +1,23 @@
+{
+  "name": "pawsec-extension",
+  "version": "1.0.0",
+  "description": "PawSec browser extension build scripts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node build.js",
+    "build": "node build.js --prod",
+    "build:chrome": "node build.js --prod",
+    "build:firefox": "node build.js --firefox --prod",
+    "build:edge": "node build.js --edge --prod",
+    "build:all": "node build.js --prod && node build.js --firefox --prod && node build.js --edge --prod",
+    "package:chrome": "node build.js --package",
+    "package:firefox": "node build.js --firefox --package",
+    "package:edge": "node build.js --edge --package",
+    "package:all": "node build.js --package && node build.js --firefox --package && node build.js --edge --package"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.0",
+    "sharp": "^0.34.5"
+  }
+}

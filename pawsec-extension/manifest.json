@@ -1,0 +1,93 @@
+{
+  "manifest_version": 3,
+  "name": "PawSec",
+  "short_name": "PawSec",
+  "description": "Enterprise prompt security — detects PII, API secrets, credentials, code injection, and more before your prompts reach AI platforms.",
+  "version": "1.0.0",
+
+  "icons": {
+    "16":  "icons/icon16.png",
+    "32":  "icons/icon32.png",
+    "48":  "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "action": {
+    "default_icon": {
+      "16":  "icons/icon16.png",
+      "32":  "icons/icon32.png",
+      "48":  "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "PawSec",
+    "default_popup": "dist/popup/popup.html"
+  },
+
+  "options_page": "dist/settings/settings.html",
+
+  "background": {
+    "service_worker": "dist/background/service_worker.js",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
+      "js":      ["dist/sites/chatgpt.js"],
+      "run_at":  "document_idle"
+    },
+    {
+      "matches": ["https://claude.ai/*"],
+      "js":      ["dist/sites/claude.js"],
+      "run_at":  "document_idle"
+    },
+    {
+      "matches": ["https://gemini.google.com/*"],
+      "js":      ["dist/sites/gemini.js"],
+      "run_at":  "document_idle"
+    },
+    {
+      "matches": ["https://www.perplexity.ai/*", "https://perplexity.ai/*"],
+      "js":      ["dist/sites/perplexity.js"],
+      "run_at":  "document_idle"
+    },
+    {
+      "matches": ["https://copilot.microsoft.com/*"],
+      "js":      ["dist/sites/copilot.js"],
+      "run_at":  "document_idle"
+    },
+    {
+      "matches": ["https://grok.com/*", "https://x.com/i/grok*"],
+      "js":      ["dist/sites/grok.js"],
+      "run_at":  "document_idle"
+    }
+  ],
+
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*",
+    "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://www.perplexity.ai/*",
+    "https://perplexity.ai/*",
+    "https://copilot.microsoft.com/*",
+    "https://grok.com/*",
+    "https://x.com/*",
+    "http://localhost:*/*",
+    "http://127.0.0.1:*/*"
+  ],
+
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs",
+    "scripting"
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": ["dist/popup/*", "dist/settings/*", "icons/*"],
+      "matches":   ["<all_urls>"]
+    }
+  ]
+}

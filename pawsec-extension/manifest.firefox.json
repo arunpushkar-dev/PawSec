@@ -1,0 +1,95 @@
+{
+  "manifest_version": 2,
+  "name": "PawSec",
+  "short_name": "PawSec",
+  "description": "Enterprise prompt security — detects PII, API secrets, credentials, code injection, and more before your prompts reach AI platforms.",
+  "version": "1.0.0",
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "pawsec@pawsec.dev",
+      "strict_min_version": "91.0"
+    }
+  },
+
+  "icons": {
+    "16":  "icons/icon16.png",
+    "32":  "icons/icon32.png",
+    "48":  "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "browser_action": {
+    "default_icon": {
+      "16":  "icons/icon16.png",
+      "32":  "icons/icon32.png",
+      "48":  "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "PawSec",
+    "default_popup": "popup/popup.html"
+  },
+
+  "options_ui": {
+    "page": "settings/settings.html",
+    "open_in_tab": true
+  },
+
+  "background": {
+    "scripts": ["background/service_worker.js"],
+    "persistent": false
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
+      "js":      ["sites/chatgpt.js"],
+      "run_at":  "document_idle"
+    },
+    {
+      "matches": ["https://claude.ai/*"],
+      "js":      ["sites/claude.js"],
+      "run_at":  "document_idle"
+    },
+    {
+      "matches": ["https://gemini.google.com/*"],
+      "js":      ["sites/gemini.js"],
+      "run_at":  "document_idle"
+    },
+    {
+      "matches": ["https://www.perplexity.ai/*", "https://perplexity.ai/*"],
+      "js":      ["sites/perplexity.js"],
+      "run_at":  "document_idle"
+    },
+    {
+      "matches": ["https://copilot.microsoft.com/*"],
+      "js":      ["sites/copilot.js"],
+      "run_at":  "document_idle"
+    },
+    {
+      "matches": ["https://grok.com/*", "https://x.com/i/grok*"],
+      "js":      ["sites/grok.js"],
+      "run_at":  "document_idle"
+    }
+  ],
+
+  "permissions": [
+    "storage",
+    "activeTab",
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*",
+    "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://www.perplexity.ai/*",
+    "https://perplexity.ai/*",
+    "https://copilot.microsoft.com/*",
+    "https://grok.com/*",
+    "https://x.com/*"
+  ],
+
+  "web_accessible_resources": [
+    "icons/*",
+    "popup/*",
+    "settings/*"
+  ]
+}
