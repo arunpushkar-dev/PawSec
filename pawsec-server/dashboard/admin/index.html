@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root {
       --bg-primary:    #fdf6f9;
@@ -156,6 +157,41 @@
     .stat-card.allowed .stat-sub   { color: var(--green); }
     .stat-card.users   .stat-sub   { color: var(--green); }
     .stat-card.total   .stat-sub   { color: var(--text-muted); }
+
+    /* ── Overview three-column layout ── */
+    .overview-body {
+      display: flex; gap: 16px; align-items: flex-start;
+    }
+    .trends-panel    { width: 300px; flex-shrink: 0; }
+    .overview-main   { flex: 1; min-width: 0; }
+    .topblocked-panel { width: 300px; flex-shrink: 0; }
+
+    /* ── Trends chart card ── */
+    .trends-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 16px 14px;
+      box-shadow: var(--shadow);
+    }
+    .trends-header { margin-bottom: 14px; }
+    .trends-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+    .trends-sub   { font-size: 11px; color: var(--text-muted); margin: 0 0 10px; }
+    .trends-legend {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 11px; color: var(--text-secondary);
+    }
+    .legend-dot {
+      display: inline-block; width: 9px; height: 9px;
+      border-radius: 50%; margin-right: 3px; flex-shrink: 0;
+    }
+    .legend-dot.blocked { background: var(--red); }
+    .legend-dot.warned  { background: var(--yellow); }
+    .legend-dot.allowed { background: var(--green); }
+    .trends-chart-wrap {
+      position: relative;
+      height: 260px;
+    }
 
     /* ── Section header ── */
     .section-header {
@@ -309,6 +345,65 @@
     .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--teal); border-radius: 50%; animation: spin 0.6s linear infinite; }
     .loading-row td { text-align: center; padding: 32px; color: var(--text-muted); }
 
+    /* ── Top-Blocked leaderboard ── */
+    .topblocked-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px;
+      display: flex; flex-direction: column; height: 100%;
+    }
+    .topblocked-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin: 0 0 2px; }
+    .topblocked-sub   { font-size: 11px; color: var(--text-muted); margin: 0 0 16px; }
+    .topblocked-list  { display: flex; flex-direction: column; gap: 10px; flex: 1; overflow-y: auto; }
+    .topblocked-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--bg-secondary);
+    }
+    .topblocked-row:hover { background: var(--bg-hover); }
+    .rank-badge {
+      min-width: 26px; height: 26px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; flex-shrink: 0;
+      background: var(--border); color: var(--text-muted);
+    }
+    .rank-badge.rank-1 { background: #ffd700; color: #7a5900; }
+    .rank-badge.rank-2 { background: #c0c0c0; color: #4a4a4a; }
+    .rank-badge.rank-3 { background: #cd7f32; color: #fff; }
+    .topblocked-info { flex: 1; min-width: 0; }
+    .topblocked-name { font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .topblocked-meta { font-size: 11px; color: var(--text-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .topblocked-count { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+    .topblocked-num   { font-size: 18px; font-weight: 700; color: var(--red); line-height: 1; }
+    .topblocked-bar-wrap { width: 60px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .topblocked-bar-fill { height: 100%; background: var(--red); border-radius: 2px; }
+    .topblocked-empty { font-size: 12px; color: var(--text-muted); text-align: center; padding: 40px 0; }
+
+    /* ── Users tab redesign ── */
+    .users-page-header { margin-bottom: 20px; }
+    .users-breadcrumb { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 10px; }
+    .users-breadcrumb .crumb-active { color: var(--teal); }
+    .users-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .users-page-title { font-size: 22px; font-weight: 700; color: var(--text-primary); margin: 0 0 6px; }
+    .users-page-sub { font-size: 12px; color: var(--text-muted); margin: 0; max-width: 460px; line-height: 1.6; }
+    .users-header-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; margin-top: 4px; }
+    .users-search-wrap { position: relative; }
+    .users-search-wrap .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+    #users-search { padding: 8px 10px 8px 32px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-secondary); font-size: 13px; color: var(--text-primary); outline: none; width: 200px; font-family: var(--font); }
+    #users-search:focus { border-color: var(--teal); }
+
+    .ustat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+    .ustat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
+    .ustat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px; }
+    .ustat-value { font-size: 30px; font-weight: 700; color: var(--text-primary); line-height: 1; margin-bottom: 8px; }
+    .ustat-warn { color: var(--red); }
+    .ustat-delta { display: inline-flex; align-items: center; gap: 4px; background: rgba(93,184,122,.15); color: var(--green); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+    .ustat-bar-wrap { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 2px; }
+    .ustat-bar-fill { height: 100%; background: var(--teal); border-radius: 2px; transition: width 0.4s; }
+    .ustat-note { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .users-footer { display: flex; align-items: center; justify-content: space-between; padding: 12px 2px; }
+    .users-showing-text { font-size: 12px; color: var(--text-muted); }
+    .users-showing-text strong { color: var(--text-secondary); font-weight: 600; }
+
     /* ── Scrollbar ── */
     ::-webkit-scrollbar       { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -445,35 +540,72 @@
     </div>
   </div>
 
-  <div class="section-header">
-    <div class="section-header-left">
-      <h2>Per-User Breakdown</h2>
-      <p>Detailed activity logs and security status per identity</p>
+  <div class="overview-body">
+    <!-- ── Left: Security Trends ── -->
+    <div class="trends-panel">
+      <div class="trends-card" id="trends-section">
+        <div class="trends-header">
+          <h2 class="trends-title">Security Trends</h2>
+          <p class="trends-sub">Last 7 days · today at top</p>
+          <div class="trends-legend">
+            <span class="legend-dot blocked"></span><span>Blocked</span>
+            <span class="legend-dot warned"></span><span>Warned</span>
+            <span class="legend-dot allowed"></span><span>Allowed</span>
+          </div>
+        </div>
+        <div class="trends-chart-wrap">
+          <canvas id="trends-chart"></canvas>
+        </div>
+      </div>
     </div>
-    <div class="section-header-actions">
-      <button class="btn" id="overview-filter-btn" style="display:flex;align-items:center;gap:5px;">
-        <span>⚙</span> Filter
-      </button>
-      <button class="btn btn-teal" id="overview-export-btn" style="display:flex;align-items:center;gap:5px;">
-        <span>↓</span> Export CSV
-      </button>
+
+    <!-- ── Middle: Per-User Breakdown ── -->
+    <div class="overview-main">
+      <div class="section-header">
+        <div class="section-header-left">
+          <h2>Per-User Breakdown</h2>
+          <p>Detailed activity logs and security status per identity</p>
+        </div>
+        <div class="section-header-actions">
+          <button class="btn btn-teal" id="overview-export-btn" style="display:flex;align-items:center;gap:5px;">
+            <span>↓</span> Export CSV
+          </button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th><th>Company ID</th><th>Email</th>
+              <th>Blocked</th><th>Warned</th><th>Allowed</th><th>Last Active</th>
+            </tr>
+          </thead>
+          <tbody id="overview-table"><tr class="loading-row"><td colspan="7"><div class="spinner" style="margin:auto;"></div></td></tr></tbody>
+        </table>
+        <div class="table-footer">
+          <span id="overview-footer-count">—</span>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th><th>Company ID</th><th>Email</th>
-          <th>Blocked</th><th>Warned</th><th>Allowed</th><th>Last Active</th>
-        </tr>
-      </thead>
-      <tbody id="overview-table"><tr class="loading-row"><td colspan="7"><div class="spinner" style="margin:auto;"></div></td></tr></tbody>
-    </table>
-    <div class="table-footer">
-      <span id="overview-footer-count">—</span>
-      <div class="table-footer-nav">
-        <button>&#8592;</button>
-        <button>&#8594;</button>
+
+    <!-- ── Right: Top 10 Blocked Users ── -->
+    <div class="topblocked-panel">
+      <div class="topblocked-card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:12px;">
+          <div>
+            <h2 class="topblocked-title">Top Blocked Users</h2>
+            <p class="topblocked-sub">Ranked by blocked prompts</p>
+          </div>
+          <select id="topblocked-period" style="font-size:11px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg-secondary);color:var(--text-secondary);outline:none;cursor:pointer;">
+            <option value="0">All time</option>
+            <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
+          </select>
+        </div>
+        <div class="topblocked-list" id="topblocked-list">
+          <div class="topblocked-empty"><div class="spinner" style="margin:auto;"></div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -481,22 +613,62 @@
 
 <!-- ═══════════════════════════ USERS TAB ═══════════════════════════════════ -->
 <div id="tab-users" class="tab-panel">
-  <div class="section-header">
-    <h2>API Key Users</h2>
-    <button class="btn btn-teal" id="add-user-btn">+ Add User</button>
+  <!-- Header -->
+  <div class="users-page-header">
+    <div class="users-breadcrumb">IDENTITY &rsaquo; <span class="crumb-active">API KEY USERS</span></div>
+    <div class="users-title-row">
+      <div>
+        <h2 class="users-page-title">API Key Users</h2>
+        <p class="users-page-sub">Manage access credentials and usage permissions for enterprise service accounts and individual developers.</p>
+      </div>
+      <div class="users-header-actions">
+        <div class="users-search-wrap">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="users-search" placeholder="Filter users…" />
+        </div>
+        <button class="btn btn-teal" id="add-user-btn">&#43; Add User</button>
+      </div>
+    </div>
   </div>
+  <!-- Stats cards -->
+  <div class="ustat-row">
+    <div class="ustat-card">
+      <div class="ustat-label">TOTAL USERS</div>
+      <div class="ustat-value" id="ustat-total">—</div>
+      <div id="ustat-delta" class="ustat-delta" style="display:none;"></div>
+    </div>
+    <div class="ustat-card">
+      <div class="ustat-label">ACTIVE KEYS</div>
+      <div class="ustat-value" id="ustat-active">—</div>
+      <div class="ustat-bar-wrap"><div class="ustat-bar-fill" id="ustat-active-bar" style="width:0%"></div></div>
+    </div>
+    <div class="ustat-card">
+      <div class="ustat-label">ROTATION REQUIRED</div>
+      <div class="ustat-value ustat-warn" id="ustat-rotate">—</div>
+      <div class="ustat-note">Keys unused 90+ days</div>
+    </div>
+    <div class="ustat-card">
+      <div class="ustat-label">TOTAL PROMPTS</div>
+      <div class="ustat-value" id="ustat-prompts">—</div>
+      <div class="ustat-note">All time</div>
+    </div>
+  </div>
+  <!-- Table -->
   <div class="table-wrap">
     <table>
       <thead>
         <tr>
-          <th>Name</th><th>Company ID</th><th>Email</th>
-          <th>API Key</th><th>Status</th><th>Created</th><th>Last Used</th><th>Actions</th>
+          <th>USER IDENTITY</th><th>COMPANY ID</th><th>API KEY</th>
+          <th>STATUS</th><th>CREATED DATE</th><th>LAST USED</th><th>ACTIONS</th>
         </tr>
       </thead>
-      <tbody id="users-table"><tr class="loading-row"><td colspan="8"><div class="spinner" style="margin:auto;"></div></td></tr></tbody>
+      <tbody id="users-table"><tr class="loading-row"><td colspan="7"><div class="spinner" style="margin:auto;"></div></td></tr></tbody>
     </table>
   </div>
-  <div class="pagination" id="users-pagination"></div>
+  <div class="users-footer">
+    <span id="users-showing" class="users-showing-text"></span>
+    <div class="pagination" id="users-pagination"></div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════ AUDIT LOG TAB ════════════════════════════════ -->
@@ -700,6 +872,20 @@ function maskApiKey(key) {
   if (!key) return '—';
   return key.slice(0, 8) + '••••••••' + key.slice(-4);
 }
+function fmtDateOnly(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+function fmtAgo(iso) {
+  if (!iso) return '—';
+  const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (m < 1)  return 'just now';
+  if (m < 60) return m + ' min' + (m > 1 ? 's' : '') + ' ago';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + ' hour' + (h > 1 ? 's' : '') + ' ago';
+  const d = Math.floor(h / 24);
+  return d + ' day' + (d > 1 ? 's' : '') + ' ago';
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Load user info
@@ -713,11 +899,114 @@ async function loadMe() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+//  Security Trends Chart
+// ─────────────────────────────────────────────────────────────────────────────
+let _trendsChart = null;
+
+async function loadTrends() {
+  const canvas = document.getElementById('trends-chart');
+  if (!canvas) return;
+  try {
+    const data = await apiFetch('/api/v1/admin/trends');
+    // Reverse: today appears at top (first row in horizontal chart)
+    const trends = (data.trends || []).slice().reverse();
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayIdx = trends.findIndex(d => d.date === todayStr);
+
+    const labels  = trends.map((d, i) => i === todayIdx ? d.label + ' ◀' : d.label);
+    const blocked = trends.map(d => d.blocked || 0);
+    const warned  = trends.map(d => d.warned  || 0);
+    const allowed = trends.map(d => d.allowed || 0);
+
+    if (_trendsChart) { _trendsChart.destroy(); _trendsChart = null; }
+
+    _trendsChart = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Blocked', data: blocked, backgroundColor: '#d95f5f', borderWidth: 0 },
+          { label: 'Warned',  data: warned,  backgroundColor: '#c9a02e', borderWidth: 0 },
+          { label: 'Allowed', data: allowed, backgroundColor: '#5db87a', borderWidth: 0 },
+        ],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#fff8fb',
+            titleColor: '#2d1f2a',
+            bodyColor: '#6b4f62',
+            borderColor: '#f0d6e4',
+            borderWidth: 1,
+            padding: 10,
+            callbacks: {
+              title: items => {
+                const t = trends[items[0].dataIndex];
+                return t.date === todayStr ? `${t.label} (Today)` : `${t.label}  ${t.date}`;
+              },
+              label: item => ` ${item.dataset.label}: ${item.parsed.x}`,
+              afterBody: items => [`  Total: ${trends[items[0].dataIndex].total}`],
+            },
+          },
+        },
+        scales: {
+          x: {
+            stacked: true,
+            beginAtZero: true,
+            border: { display: false },
+            grid: { color: 'rgba(240,214,228,0.45)', drawTicks: false },
+            ticks: {
+              color: '#a07890',
+              font: { size: 10 },
+              precision: 0,
+              maxTicksLimit: 6,
+            },
+          },
+          y: {
+            stacked: true,
+            border: { display: false },
+            grid: { display: false },
+            ticks: {
+              color: '#6b4f62',
+              font: { size: 11 },
+              padding: 6,
+            },
+          },
+        },
+      },
+    });
+    // Clear any previous error overlay
+    const prevErr = canvas.parentElement.querySelector('.trends-err');
+    if (prevErr) prevErr.remove();
+  } catch (err) {
+    console.warn('Trends fetch failed:', err.message);
+    // Don't destroy the canvas — overlay error so the next 30s poll can recover
+    const wrap = canvas.parentElement;
+    let errMsg = wrap.querySelector('.trends-err');
+    if (!errMsg) {
+      errMsg = document.createElement('p');
+      errMsg.className = 'trends-err';
+      errMsg.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-muted);margin:0;pointer-events:none;';
+      wrap.style.position = 'relative';
+      wrap.appendChild(errMsg);
+    }
+    errMsg.textContent = 'No trend data yet';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 //  Overview tab
 // ─────────────────────────────────────────────────────────────────────────────
 async function loadOverview() {
   try {
     const data = await apiFetch('/api/v1/admin/stats');
+    _adminStats = data;
+    _updateUserStats();
     document.getElementById('ov-users').textContent   = data.total_users;
     document.getElementById('ov-total').textContent   = data.total_prompts;
     document.getElementById('ov-blocked').textContent = data.blocked;
@@ -735,10 +1024,10 @@ async function loadOverview() {
       `Showing ${users.length} of ${users.length} registered user${users.length !== 1 ? 's' : ''}`;
 
     tbody.innerHTML = users.map(u => {
-      const initial = (u.name || '?')[0].toUpperCase();
-      const role    = u.is_admin ? 'System Root' : 'Staff Member';
-      const compId  = u.company_id ? `<span class="company-pill">${esc(u.company_id)}</span>` : '<span class="muted">—</span>';
-      const lastDt  = u.last_active ? new Date(u.last_active) : null;
+      const initial  = (u.name || '?')[0].toUpperCase();
+      const role     = u.is_admin ? 'System Root' : 'Staff Member';
+      const compId   = u.company_id ? `<span class="company-pill">${esc(u.company_id)}</span>` : '<span class="muted">—</span>';
+      const lastDt   = u.last_active ? new Date(u.last_active) : null;
       const datePart = lastDt ? lastDt.toLocaleDateString([], { day:'2-digit', month:'short' }) : '—';
       const timePart = lastDt ? lastDt.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '';
       return `<tr>
@@ -766,43 +1055,132 @@ async function loadOverview() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+//  Top Blocked Users
+// ─────────────────────────────────────────────────────────────────────────────
+function renderTopBlocked(users) {
+  const listEl = document.getElementById('topblocked-list');
+  if (!listEl) return;
+  if (!users || users.length === 0) {
+    listEl.innerHTML = '<div class="topblocked-empty">No blocked prompts in this period.</div>';
+    return;
+  }
+  const maxBlocked = users[0]?.blocked || 1;
+  listEl.innerHTML = users.map((u, i) => {
+    const rank     = i + 1;
+    const initials = (u.name || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+    const pct      = Math.round((u.blocked / maxBlocked) * 100);
+    const rankCls  = rank <= 3 ? ` rank-${rank}` : '';
+    const comp     = u.company_id ? `${esc(u.company_id)} · ` : '';
+    return `
+    <div class="topblocked-row">
+      <div class="rank-badge${rankCls}">#${rank}</div>
+      <div class="user-avatar" style="width:32px;height:32px;font-size:12px;flex-shrink:0;">${esc(initials)}</div>
+      <div class="topblocked-info">
+        <div class="topblocked-name">${esc(u.name)}</div>
+        <div class="topblocked-meta">${comp}${esc(u.email)}</div>
+      </div>
+      <div class="topblocked-count">
+        <span class="topblocked-num">${u.blocked}</span>
+        <div class="topblocked-bar-wrap">
+          <div class="topblocked-bar-fill" style="width:${pct}%"></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function loadTopBlocked(days = 0) {
+  const listEl = document.getElementById('topblocked-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<div class="topblocked-empty"><div class="spinner" style="margin:auto;"></div></div>';
+  try {
+    const data = await apiFetch(`/api/v1/admin/top-blocked?days=${days}`);
+    renderTopBlocked(data.users || []);
+  } catch (err) {
+    listEl.innerHTML = `<div class="topblocked-empty" style="color:var(--red);">Error: ${esc(err.message)}</div>`;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 //  Users tab
 // ─────────────────────────────────────────────────────────────────────────────
 let usersPage = 1;
 const USERS_PAGE_SIZE = 50;
+let _adminStats = null;
+let _currentPageUsers = [];
 
 async function loadUsers(page = 1) {
   usersPage = page;
   const tbody = document.getElementById('users-table');
-  tbody.innerHTML = '<tr class="loading-row"><td colspan="8"><div class="spinner" style="margin:auto;"></div></td></tr>';
+  tbody.innerHTML = '<tr class="loading-row"><td colspan="7"><div class="spinner" style="margin:auto;"></div></td></tr>';
   try {
     const data = await apiFetch(`/api/v1/admin/users?page=${page}&page_size=${USERS_PAGE_SIZE}`);
-    renderUsersTable(data.users);
+    _currentPageUsers = data.users || [];
+    renderUsersTable(_currentPageUsers);
     renderPagination('users-pagination', data.total, USERS_PAGE_SIZE, page, loadUsers);
+    // Showing X–Y of Z
+    const from = (page - 1) * USERS_PAGE_SIZE + 1;
+    const to   = Math.min(page * USERS_PAGE_SIZE, data.total);
+    const showEl = document.getElementById('users-showing');
+    if (showEl) showEl.innerHTML = `Showing <strong>${from}–${to}</strong> of <strong>${data.total}</strong> users`;
+    // Update ustat total from authoritative server count
+    const totalEl = document.getElementById('ustat-total');
+    if (totalEl) totalEl.textContent = data.total;
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--red);padding:24px;">Error: ${esc(err.message)}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--red);padding:24px;">Error: ${esc(err.message)}</td></tr>`;
   }
 }
 
 // Global user cache — keyed by user_id so onclick can safely pass just the ID
 const _usersCache = {};
 
+function _updateUserStats() {
+  const all = Object.values(_usersCache);
+  const active = all.filter(u => u.is_active).length;
+  const ninetyAgo = Date.now() - 90 * 86400000;
+  const rotate = all.filter(u => !u.last_used_at || new Date(u.last_used_at).getTime() < ninetyAgo).length;
+  const activeEl = document.getElementById('ustat-active');
+  const rotateEl = document.getElementById('ustat-rotate');
+  const barEl    = document.getElementById('ustat-active-bar');
+  if (activeEl) activeEl.textContent = active;
+  if (rotateEl) rotateEl.textContent = rotate;
+  if (barEl && all.length > 0) barEl.style.width = Math.round(active / all.length * 100) + '%';
+  if (_adminStats) {
+    const pEl = document.getElementById('ustat-prompts');
+    if (pEl) pEl.textContent = (_adminStats.total_prompts || 0).toLocaleString();
+  }
+}
+
 function renderUsersTable(users) {
   const tbody = document.getElementById('users-table');
   if (!users || users.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:24px;">No users found.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">No users found.</td></tr>';
     return;
   }
-  // Populate cache so onclick handlers can look up full user object by ID
   users.forEach(u => { _usersCache[u.user_id] = u; });
-  tbody.innerHTML = users.map(u => `
+  _updateUserStats();
+
+  const searchVal = (document.getElementById('users-search')?.value || '').toLowerCase();
+  const list = searchVal ? users.filter(u =>
+    (u.name  || '').toLowerCase().includes(searchVal) ||
+    (u.email || '').toLowerCase().includes(searchVal) ||
+    (u.company_id || '').toLowerCase().includes(searchVal)
+  ) : users;
+
+  tbody.innerHTML = list.map(u => {
+    const initials = (u.name || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+    return `
     <tr id="user-row-${esc(u.user_id)}">
       <td>
-        ${esc(u.name)}
-        ${u.is_admin ? '<span class="badge admin" style="margin-left:6px;">Admin</span>' : ''}
+        <div class="user-cell">
+          <div class="user-avatar">${esc(initials)}</div>
+          <div>
+            <div class="user-name">${esc(u.name)}${u.is_admin ? '&nbsp;<span class="badge admin">Admin</span>' : ''}</div>
+            <div class="user-role">${esc(u.email)}</div>
+          </div>
+        </div>
       </td>
-      <td class="muted">${esc(u.company_id || '—')}</td>
-      <td class="muted">${esc(u.email)}</td>
+      <td><span class="company-pill">${esc(u.company_id || '—')}</span></td>
       <td>
         <div class="api-key-cell">
           <span class="api-key-masked" id="key-display-${esc(u.user_id)}">${maskApiKey(u.api_key)}</span>
@@ -812,8 +1190,8 @@ function renderUsersTable(users) {
         </div>
       </td>
       <td><span class="badge ${u.is_active ? 'active' : 'inactive'}">${u.is_active ? 'Active' : 'Inactive'}</span></td>
-      <td class="muted">${fmtDate(u.created_at)}</td>
-      <td class="muted">${fmtDate(u.last_used_at)}</td>
+      <td class="muted">${fmtDateOnly(u.created_at)}</td>
+      <td class="muted">${fmtAgo(u.last_used_at)}</td>
       <td>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="btn btn-sm" onclick="openEditModal(_usersCache['${esc(u.user_id)}'])">Edit</button>
@@ -822,7 +1200,8 @@ function renderUsersTable(users) {
           <button class="btn btn-sm btn-danger" onclick="deleteUser('${esc(u.user_id)}', '${esc(u.name)}')">Delete</button>
         </div>
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 let keyVisible = {};
@@ -843,6 +1222,11 @@ function toggleKey(userId) {
 // ─────────────────────────────────────────────────────────────────────────────
 //  Add User
 // ─────────────────────────────────────────────────────────────────────────────
+// Search filter — re-renders current page client-side
+document.getElementById('users-search').addEventListener('input', () => {
+  if (_currentPageUsers.length) renderUsersTable(_currentPageUsers);
+});
+
 const addModal = document.getElementById('add-user-modal');
 document.getElementById('add-user-btn').addEventListener('click', () => {
   document.getElementById('new-name').value = '';
@@ -1211,8 +1595,10 @@ function connectWS() {
 }
 
 function handleNewPromptWS(msg) {
-  // Refresh overview stats
+  // Refresh overview stats, trends chart, and top blocked
   loadOverview();
+  loadTrends();
+  loadTopBlocked(parseInt(document.getElementById('topblocked-period')?.value || '0', 10));
   // Reload the audit table from the server so session rows update in-place
   // (inserting a separate live row would duplicate the session entry)
   const activeTab = document.querySelector('.tab-btn.active');
@@ -1227,10 +1613,17 @@ function handleNewPromptWS(msg) {
 async function init() {
   await loadMe();
   await loadOverview();
+  loadTrends();
+  loadTopBlocked(0);
   await loadUsers(1);
   await loadAuditUsers();
   await loadAudit(1);
   connectWS();
+
+  // Period selector for Top Blocked
+  document.getElementById('topblocked-period')?.addEventListener('change', e => {
+    loadTopBlocked(parseInt(e.target.value, 10));
+  });
 }
 
 init();
@@ -1238,8 +1631,10 @@ init();
 // ── Always-on auto-refresh every 30 s ────────────────────────────────────────
 const ADMIN_POLL_MS = 30_000;
 setInterval(async () => {
-  // Overview stats always refresh
+  // Overview stats and trends always refresh
   loadOverview();
+  loadTrends();
+  loadTopBlocked(parseInt(document.getElementById('topblocked-period')?.value || '0', 10));
   // Refresh whichever tab is currently visible
   const activeTab = document.querySelector('.tab-btn.active');
   if (!activeTab) return;

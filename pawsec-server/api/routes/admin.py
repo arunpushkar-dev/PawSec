@@ -139,6 +139,25 @@ async def admin_stats(
     return await crud.get_admin_stats(db)
 
 
+@router.get("/trends")
+async def admin_trends(
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    """Daily security trend counts for the last 7 days."""
+    return {"trends": await crud.get_admin_trends(db)}
+
+
+@router.get("/top-blocked")
+async def admin_top_blocked(
+    days: int = Query(0, ge=0),
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    """Top 10 users by blocked prompt count. days=0 means all time."""
+    return {"users": await crud.get_top_blocked_users(db, days=days)}
+
+
 @router.get("/sessions", response_model=AdminSessionListResponse)
 async def admin_sessions(
     page: int = Query(1, ge=1),

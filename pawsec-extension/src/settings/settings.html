@@ -98,16 +98,116 @@
       <h2>In-Browser Analyzers</h2>
       <p class="hint">Disable individual analyzers to reduce false positives on specific content.</p>
 
-      <div class="check-grid">
-        <label class="check-item"><input type="checkbox" id="az-pii"            checked /> PII Detection</label>
-        <label class="check-item"><input type="checkbox" id="az-code-injection" checked /> Code Injection</label>
-        <label class="check-item"><input type="checkbox" id="az-api-secrets"    checked /> API Secrets</label>
-        <label class="check-item"><input type="checkbox" id="az-credentials"    checked /> Credentials</label>
-        <label class="check-item"><input type="checkbox" id="az-private-url"    checked /> Private URLs</label>
-        <label class="check-item"><input type="checkbox" id="az-phi"            checked /> PHI Detection</label>
-        <label class="check-item"><input type="checkbox" id="az-business-data"  checked /> Business Data</label>
-        <label class="check-item"><input type="checkbox" id="az-financial-data" checked /> Financial Data</label>
-        <label class="check-item"><input type="checkbox" id="az-unknown-malicious" checked /> Malicious Intent</label>
+      <div class="az-list">
+
+        <div class="az-card">
+          <div class="az-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+          <div class="az-info">
+            <div class="az-title">PII Detection</div>
+            <div class="az-desc">Detects names, emails, phone numbers and other personal identifiers.</div>
+          </div>
+          <label class="az-toggle" for="az-pii">
+            <input type="checkbox" id="az-pii" class="az-cb" checked />
+            <span class="az-track"><span class="az-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="az-card">
+          <div class="az-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+          <div class="az-info">
+            <div class="az-title">Code Injection</div>
+            <div class="az-desc">Heuristic detection for SQLi and XSS payloads in inputs.</div>
+          </div>
+          <label class="az-toggle" for="az-code-injection">
+            <input type="checkbox" id="az-code-injection" class="az-cb" checked />
+            <span class="az-track"><span class="az-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="az-card">
+          <div class="az-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M21 2l-9.6 9.6"/><path d="M15.5 7.5l3 3L22 7l-3-3"/></svg></div>
+          <div class="az-info">
+            <div class="az-title">API Secrets</div>
+            <div class="az-desc">Detects API keys, tokens, and secret strings leaked in prompts.</div>
+          </div>
+          <label class="az-toggle" for="az-api-secrets">
+            <input type="checkbox" id="az-api-secrets" class="az-cb" checked />
+            <span class="az-track"><span class="az-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="az-card">
+          <div class="az-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          <div class="az-info">
+            <div class="az-title">Credentials</div>
+            <div class="az-desc">Detects usernames, passwords, and authentication credentials.</div>
+          </div>
+          <label class="az-toggle" for="az-credentials">
+            <input type="checkbox" id="az-credentials" class="az-cb" checked />
+            <span class="az-track"><span class="az-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="az-card">
+          <div class="az-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
+          <div class="az-info">
+            <div class="az-title">Private URLs</div>
+            <div class="az-desc">Detects internal hostnames, private IPs, and intranet links.</div>
+          </div>
+          <label class="az-toggle" for="az-private-url">
+            <input type="checkbox" id="az-private-url" class="az-cb" checked />
+            <span class="az-track"><span class="az-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="az-card">
+          <div class="az-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+          <div class="az-info">
+            <div class="az-title">PHI Detection</div>
+            <div class="az-desc">Detects Protected Health Information subject to HIPAA rules.</div>
+          </div>
+          <label class="az-toggle" for="az-phi">
+            <input type="checkbox" id="az-phi" class="az-cb" checked />
+            <span class="az-track"><span class="az-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="az-card">
+          <div class="az-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+          <div class="az-info">
+            <div class="az-title">Business Data</div>
+            <div class="az-desc">Detects confidential business information and trade secrets.</div>
+          </div>
+          <label class="az-toggle" for="az-business-data">
+            <input type="checkbox" id="az-business-data" class="az-cb" checked />
+            <span class="az-track"><span class="az-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="az-card">
+          <div class="az-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+          <div class="az-info">
+            <div class="az-title">Financial Data</div>
+            <div class="az-desc">Detects card numbers, bank accounts, and financial identifiers.</div>
+          </div>
+          <label class="az-toggle" for="az-financial-data">
+            <input type="checkbox" id="az-financial-data" class="az-cb" checked />
+            <span class="az-track"><span class="az-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="az-card">
+          <div class="az-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+          <div class="az-info">
+            <div class="az-title">Malicious Intent</div>
+            <div class="az-desc">Detects unknown adversarial and manipulative prompt patterns.</div>
+          </div>
+          <label class="az-toggle" for="az-unknown-malicious">
+            <input type="checkbox" id="az-unknown-malicious" class="az-cb" checked />
+            <span class="az-track"><span class="az-thumb"></span></span>
+          </label>
+        </div>
+
       </div>
     </section>
 
@@ -115,8 +215,18 @@
     <section>
       <h2>Local LLM Analysis</h2>
       <p class="hint">Requires PawSec Server + Ollama running locally. When enabled, LLM semantic analysis runs in parallel with in-browser analyzers — the more severe result is used for the final decision.</p>
-      <div class="check-grid" style="grid-template-columns: 1fr;">
-        <label class="check-item"><input type="checkbox" id="az-llm" checked /> Enable Local LLM Prompt Analysis</label>
+      <div class="az-list">
+        <div class="az-card">
+          <div class="az-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
+          <div class="az-info">
+            <div class="az-title">Enable Local LLM Analysis</div>
+            <div class="az-desc">Runs semantic analysis in parallel via Ollama. Requires PawSec Server.</div>
+          </div>
+          <label class="az-toggle" for="az-llm">
+            <input type="checkbox" id="az-llm" class="az-cb" checked />
+            <span class="az-track"><span class="az-thumb"></span></span>
+          </label>
+        </div>
       </div>
     </section>
 

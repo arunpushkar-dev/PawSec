@@ -116,26 +116,66 @@ input[type="range"] {
   color: var(--muted);
 }
 
-.check-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+/* ── Analyzer toggle cards ── */
+.az-list {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
-.check-item {
+.az-card {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 400;
-  padding: 8px 12px;
+  gap: 12px;
+  padding: 12px 14px;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  cursor: pointer;
+  border-radius: 10px;
   transition: border-color 0.15s;
 }
-.check-item:hover { border-color: var(--accent); }
-.check-item input { accent-color: var(--accent); }
+.az-card:hover { border-color: var(--accent); }
+.az-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: rgba(200,127,164,0.15);
+  color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.az-info { flex: 1; min-width: 0; }
+.az-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.az-desc  { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+
+/* Hidden real checkbox — JS reads .checked from this */
+.az-cb {
+  position: absolute;
+  opacity: 0; width: 0; height: 0;
+  pointer-events: none;
+}
+/* Visual toggle */
+.az-toggle {
+  flex-shrink: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+.az-track {
+  width: 44px; height: 24px;
+  border-radius: 12px;
+  background: var(--border);
+  position: relative;
+  transition: background 0.2s;
+}
+.az-thumb {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+  transition: left 0.2s;
+}
+.az-cb:checked + .az-track { background: var(--accent); }
+.az-cb:checked + .az-track .az-thumb { left: 23px; }
 
 .save-row {
   display: flex;

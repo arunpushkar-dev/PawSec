@@ -519,6 +519,101 @@ async def get_admin_stats(db: AsyncSession) -> dict:
     }
 
 
+async def get_admin_trends(db: AsyncSession) -> list:
+    """Return daily blocked/warned/allowed counts for the last 7 days."""
+    from datetime import timedelta
+
+    today = datetime.utcnow().date()
+    cutoff = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=6)
+
+    # Group by (day, action_taken) — avoids case() syntax differences across SQLAlchemy versions
+    result = await db.execute(
+        select(
+            func.date(PromptRecord.timestamp).label('day'),
+            PromptRecord.action_taken,
+            func.count(PromptRecord.prompt_id).label('cnt'),
+        )
+        .where(PromptRecord.timestamp >= cutoff)
+        .group_by(func.date(PromptRecord.timestamp), PromptRecord.action_taken)
+        .order_by(func.date(PromptRecord.timestamp))
+    )
+    rows = result.fetchall()
+
+    # Pivot into {date_str: {action: count}}
+    day_data: dict = {}
+    for row in rows:
+        d = str(row.day)
+        if d not in day_data:
+            day_data[d] = {'BLOCKED': 0, 'WARNED': 0, 'ALLOWED': 0}
+        if row.action_taken in ('BLOCKED', 'WARNED', 'ALLOWED'):
+            day_data[d][row.action_taken] = int(row.cnt)
+
+    # ALLOWED prompts are never stored as PromptRecords — read from Session.allowed_count
+    allowed_result = await db.execute(
+        select(
+            func.date(Session.started_at).label('day'),
+            func.sum(Session.allowed_count).label('cnt'),
+        )
+        .where(Session.started_at >= cutoff)
+        .group_by(func.date(Session.started_at))
+    )
+    for row in allowed_result.fetchall():
+        d = str(row.day)
+        if d not in day_data:
+            day_data[d] = {'BLOCKED': 0, 'WARNED': 0, 'ALLOWED': 0}
+        day_data[d]['ALLOWED'] = int(row.cnt or 0)
+
+    days = [(today - timedelta(days=i)) for i in range(6, -1, -1)]
+    return [
+        {
+            "date":    str(d),
+            "label":   d.strftime('%a').upper(),
+            "blocked": day_data.get(str(d), {}).get('BLOCKED', 0),
+            "warned":  day_data.get(str(d), {}).get('WARNED',  0),
+            "allowed": day_data.get(str(d), {}).get('ALLOWED', 0),
+            "total":   sum(day_data.get(str(d), {v: 0 for v in ('BLOCKED','WARNED','ALLOWED')}).values()),
+        }
+        for d in days
+    ]
+
+
+async def get_top_blocked_users(db: AsyncSession, days: int = 0) -> list:
+    """Return top 10 users ranked by blocked prompt count, optionally filtered by days."""
+    from datetime import timedelta
+
+    query = (
+        select(
+            PromptRecord.user_id,
+            func.count(PromptRecord.prompt_id).label('blocked'),
+        )
+        .where(PromptRecord.action_taken == 'BLOCKED')
+    )
+
+    if days > 0:
+        cutoff = datetime.utcnow() - timedelta(days=days)
+        query = query.where(PromptRecord.timestamp >= cutoff)
+
+    query = (
+        query.group_by(PromptRecord.user_id)
+        .order_by(func.count(PromptRecord.prompt_id).desc())
+        .limit(10)
+    )
+
+    rows = (await db.execute(query)).fetchall()
+
+    result = []
+    for row in rows:
+        user = await db.get(User, row.user_id)
+        result.append({
+            'user_id':    row.user_id,
+            'name':       user.name       if user else 'Unknown',
+            'email':      user.email      if user else '',
+            'company_id': user.company_id if user else None,
+            'blocked':    int(row.blocked),
+        })
+    return result
+
+
 async def get_admin_sessions(
     db: AsyncSession,
     page: int = 1,
