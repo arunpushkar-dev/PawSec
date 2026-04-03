@@ -89,7 +89,8 @@ async function checkServer(url, apiKey) {
       serverLabel.textContent = 'Server connected';
       dashBtn.disabled = false;
       dashBtn.addEventListener('click', () => {
-        chrome.tabs.create({ url: `${url}/dashboard` });
+        const keyParam = apiKey ? `?key=${encodeURIComponent(apiKey)}` : '';
+        chrome.tabs.create({ url: `${url}/dashboard${keyParam}` });
       });
       // Fetch user identity and server stats
       if (apiKey) {

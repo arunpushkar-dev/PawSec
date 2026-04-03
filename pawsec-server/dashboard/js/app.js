@@ -12,6 +12,11 @@ import { SessionDetailManager } from './session_detail.js';
 const params   = new URLSearchParams(window.location.search);
 const API_BASE = params.get('server') || localStorage.getItem('pawsec_server') || '';
 const API_KEY  = params.get('key')    || localStorage.getItem('pawsec_api_key') || '';
+
+// If the key arrived via URL param, persist it so page refreshes stay on the same user
+if (params.get('key')) {
+  localStorage.setItem('pawsec_api_key', params.get('key'));
+}
 const WS_URL   = (API_BASE
   ? API_BASE.replace(/^http/, 'ws')
   : `ws://${location.host}`) + '/ws/dashboard' + (API_KEY ? `?token=${API_KEY}` : '');
