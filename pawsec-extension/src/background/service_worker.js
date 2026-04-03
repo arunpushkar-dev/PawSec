@@ -18,47 +18,48 @@ const DEFAULTS = {
 };
 
 // ─── Session ─────────────────────────────────────────────
-let currentSession = null;
-let blockedCount   = 0;
+// Per-platform in-memory cache: { 'chatgpt.com': 'sess_xxx', 'claude.ai': 'sess_yyy', ... }
+let currentSessions = {};
+let blockedCount    = 0;
 
-const SESSION_STORE_KEY   = 'pawsec_current_session';
-const SESSION_TIMEOUT_MS  = 30 * 60 * 1000; // 30 minutes idle → new session
+// v2 key stores a map of platform → { id, date, last_active }
+const SESSION_STORE_KEY  = 'pawsec_sessions_v2';
+const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes idle → new session
 
 async function ensureSession(platform = 'unknown') {
   const now   = Date.now();
   const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
 
-  // 1. In-memory cache — still valid only if within the idle timeout
-  if (currentSession) {
+  // 1. In-memory cache for this specific platform
+  if (currentSessions[platform]) {
     try {
-      const stored = await chrome.storage.local.get(SESSION_STORE_KEY);
-      const entry  = stored[SESSION_STORE_KEY];
-      if (entry?.id === currentSession && (now - (entry.last_active ?? 0)) < SESSION_TIMEOUT_MS) {
-        // Touch last_active
-        await chrome.storage.local.set({ [SESSION_STORE_KEY]: { ...entry, last_active: now } });
-        return currentSession;
+      const stored     = await chrome.storage.local.get(SESSION_STORE_KEY);
+      const allSessions = stored[SESSION_STORE_KEY] || {};
+      const entry      = allSessions[platform];
+      if (entry?.id === currentSessions[platform] && (now - (entry.last_active ?? 0)) < SESSION_TIMEOUT_MS) {
+        allSessions[platform] = { ...entry, last_active: now };
+        await chrome.storage.local.set({ [SESSION_STORE_KEY]: allSessions });
+        return currentSessions[platform];
       }
     } catch { /* ignore */ }
-    // Idle timeout exceeded — fall through to create a new session
-    currentSession = null;
+    // Idle timeout exceeded for this platform — fall through to create a new one
+    currentSessions[platform] = null;
   }
 
-  // 2. Restore from storage if within timeout window and same day
+  // 2. Restore from storage for this platform if within timeout and same day
   try {
-    const stored = await chrome.storage.local.get(SESSION_STORE_KEY);
-    const entry  = stored[SESSION_STORE_KEY];
-    if (
-      entry?.date === today &&
-      entry?.id &&
-      (now - (entry.last_active ?? 0)) < SESSION_TIMEOUT_MS
-    ) {
-      currentSession = entry.id;
-      await chrome.storage.local.set({ [SESSION_STORE_KEY]: { ...entry, last_active: now } });
-      return currentSession;
+    const stored     = await chrome.storage.local.get(SESSION_STORE_KEY);
+    const allSessions = stored[SESSION_STORE_KEY] || {};
+    const entry      = allSessions[platform];
+    if (entry?.date === today && entry?.id && (now - (entry.last_active ?? 0)) < SESSION_TIMEOUT_MS) {
+      currentSessions[platform] = entry.id;
+      allSessions[platform] = { ...entry, last_active: now };
+      await chrome.storage.local.set({ [SESSION_STORE_KEY]: allSessions });
+      return currentSessions[platform];
     }
   } catch { /* storage unavailable */ }
 
-  // 3. No valid session — create one on the server
+  // 3. No valid session for this platform — create one on the server
   const { server_url, server_api_key } = await chrome.storage.sync.get(['server_url', 'server_api_key']);
   if (!server_url) return null;
 
@@ -74,13 +75,14 @@ async function ensureSession(platform = 'unknown') {
     });
     if (res.ok) {
       const data = await res.json();
-      currentSession = data.session_id;
+      currentSessions[platform] = data.session_id;
       try {
-        await chrome.storage.local.set({
-          [SESSION_STORE_KEY]: { id: currentSession, date: today, last_active: now }
-        });
+        const stored     = await chrome.storage.local.get(SESSION_STORE_KEY);
+        const allSessions = stored[SESSION_STORE_KEY] || {};
+        allSessions[platform] = { id: data.session_id, date: today, last_active: now };
+        await chrome.storage.local.set({ [SESSION_STORE_KEY]: allSessions });
       } catch { /* ignore */ }
-      return currentSession;
+      return currentSessions[platform];
     }
   } catch { /* offline */ }
   return null;
@@ -261,6 +263,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     blockedCount = 0;
     updateBadge();
     chrome.storage.local.set({ pawsec_stats: { total: 0, blocked: 0, warned: 0 } });
+    currentSessions = {};
   }
 });
 
@@ -280,7 +283,7 @@ chrome.runtime.onInstalled.addListener(() => {
 // queue. The date-keyed local storage entry is self-expiring — no need to
 // remove it; a new day will naturally produce a new session.
 chrome.runtime.onStartup.addListener(() => {
-  currentSession = null;
+  currentSessions = {};
   flushQueue();
 });
 self.addEventListener('fetch', () => {}); // keep SW active hint
