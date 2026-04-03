@@ -9,7 +9,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.auth import require_api_key
 from api.models import AnalyzeRequest, AnalyzeResponse
 from api.websocket import manager
-from config import settings
 from database.db import get_db
 from database import crud
 from database.models import User
@@ -18,10 +17,13 @@ from analyzers.analyzer_runner import run_analysis
 router = APIRouter(dependencies=[Depends(require_api_key)])
 
 
-def _determine_action(risk_level: str, risk_score: int) -> str:
-    if risk_score >= 70 or risk_level in ("HIGH", "CRITICAL"):
+def _determine_action(_risk_level: str, risk_score: int) -> str:
+    # Thresholds match the extension defaults (block_threshold=70, warn_threshold=30).
+    # risk_level is NOT used here because HIGH maps to score 50-69 which should be
+    # WARNED, not BLOCKED — using risk_level caused warned prompts to appear blocked.
+    if risk_score >= 70:
         return "BLOCKED"
-    if risk_score >= 30 or risk_level == "MEDIUM":
+    if risk_score >= 30:
         return "WARNED"
     return "ALLOWED"
 
@@ -54,7 +56,7 @@ async def analyze_prompt(
             risk_score = client_score
             risk_level = client_level
 
-    action = _determine_action(risk_level, risk_score)
+    action = _determine_action(risk_level, risk_score)  # risk_level kept for call-site clarity
 
     # LLM pre-check calls send only ['llm','risk'] — they are fast-path lookups
     # used by the extension to get Ollama's semantic verdict before the user's
